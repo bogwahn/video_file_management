@@ -11,16 +11,11 @@ class VideoMarksFile(Protocol):
     Implementations decide how marks are formatted when serialized.
     """
 
-    def add_mark(self, mark: VideoMark) -> None:
+    def add(self, timecode: str, label: str) -> None:
         ...
 
-    def remove_mark(self, mark: VideoMark) -> None:
-        ...
-
-    def add(self, mark: VideoMark) -> None:
-        ...
-
-    def remove(self, mark: VideoMark) -> None:
+    def remove(self, identifier: str | int) -> None:
+        """Remove by timecode (str) or position (int)."""
         ...
 
     def marks(self) -> Iterable[VideoMark]:

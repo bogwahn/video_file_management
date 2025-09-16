@@ -15,21 +15,18 @@ class ChaptersFile(VideoMarksFile):
     def __init__(self) -> None:
         self._marks: List[VideoMark] = []
 
-    def add_mark(self, mark: VideoMark) -> None:
+    def add(self, timecode: str, label: str) -> None:
+        mark = VideoMark(timecode=timecode, label=label)
         if mark not in self._marks:
             self._marks.append(mark)
 
-    def add(self, mark: VideoMark) -> None:
-        self.add_mark(mark)
-
-    def remove_mark(self, mark: VideoMark) -> None:
-        try:
-            self._marks.remove(mark)
-        except ValueError:
-            pass
-
-    def remove(self, mark: VideoMark) -> None:
-        self.remove_mark(mark)
+    def remove(self, identifier: str | int) -> None:
+        if isinstance(identifier, int):
+            if 0 <= identifier < len(self._marks):
+                del self._marks[identifier]
+            return
+        # Otherwise treat as timecode string
+        self._marks = [m for m in self._marks if m.timecode != identifier]
 
     def marks(self) -> Iterable[VideoMark]:
         return tuple(self._marks)
