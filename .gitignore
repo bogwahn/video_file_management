@@ -1,0 +1,33 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.build/
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# Test and coverage
+.coverage*
+.pytest_cache/
+htmlcov/
+.tox/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+# Placeholder inits (ignored)
+src/video_file_management/domain/__init__.py
+src/video_file_management/marks/__init__.py
+src/video_file_management/utils/__init__.py
