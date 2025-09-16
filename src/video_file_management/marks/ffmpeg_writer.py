@@ -13,8 +13,8 @@ def generate_ffmetadata(chapters: VideoMarksFile, video_duration_ms: int) -> str
     """Generate ffmpeg ffmetadata format from chapters.
     
     Returns text content ready to write to a .ffmetadata file.
-    Creates proper chapter ranges: each chapter starts at its timestamp
-    and ends when the next chapter begins (or at video end for last chapter).
+    Each chapter starts exactly at its timestamp and ends when the next begins.
+    No chapter at 0:00:00 - first chapter starts at first mark timestamp.
     """
     marks = list(chapters.marks())
     if not marks:
@@ -94,20 +94,34 @@ class FFmpegChapterWriter:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             ffmetadata_file = temp_path / "chapters.ffmetadata"
+            temp_video_clean = temp_path / "temp_no_chapters.mp4"
             temp_video = temp_path / "temp_with_chapters.mp4"
             
             # Write ffmetadata file
             ffmetadata_file.write_text(ffmetadata_content, encoding="utf-8")
             
-            # Use simplified ffmpeg command - let it handle chapters automatically
-            cmd = [
+            # Step 1: Strip all existing chapters
+            cmd1 = [
                 "ffmpeg", "-hide_banner", "-loglevel", "error",
                 "-i", str(video),
+                "-map", "0",
+                "-map_chapters", "-1",
+                "-c", "copy",
+                "-y", str(temp_video_clean)
+            ]
+            subprocess.run(cmd1, check=True)
+            
+            # Step 2: Add only our specific chapters
+            cmd2 = [
+                "ffmpeg", "-hide_banner", "-loglevel", "error",
+                "-i", str(temp_video_clean),
                 "-i", str(ffmetadata_file),
+                "-map", "0",
+                "-map_chapters", "1",
                 "-c", "copy",
                 "-y", str(temp_video)
             ]
-            subprocess.run(cmd, check=True)
+            subprocess.run(cmd2, check=True)
             
             # Verify the output file exists and is valid
             if not temp_video.exists() or temp_video.stat().st_size == 0:
