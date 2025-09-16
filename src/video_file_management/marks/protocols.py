@@ -9,6 +9,8 @@ class VideoMarksFile(Protocol):
     """Protocol for a collection of VideoMark entries.
 
     Implementations decide how marks are formatted when serialized.
+    Implementations should parse the provided timecode string into a
+    datetime.timedelta for internal storage.
     """
 
     file_path: str

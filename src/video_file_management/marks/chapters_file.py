@@ -4,6 +4,7 @@ from typing import Iterable, List
 
 from .models import VideoMark
 from .protocols import VideoMarksFile
+from ..utils.timecode import parse_timecode, format_timecode
 
 
 class ChaptersFile(VideoMarksFile):
@@ -17,7 +18,7 @@ class ChaptersFile(VideoMarksFile):
         self._marks: List[VideoMark] = []
 
     def add(self, timecode: str, label: str) -> None:
-        mark = VideoMark(timecode=timecode, label=label)
+        mark = VideoMark(timecode=parse_timecode(timecode), label=label)
         if mark not in self._marks:
             self._marks.append(mark)
 
@@ -27,12 +28,16 @@ class ChaptersFile(VideoMarksFile):
                 del self._marks[identifier]
             return
         # Otherwise treat as timecode string
-        self._marks = [m for m in self._marks if m.timecode != identifier]
+        try:
+            target = parse_timecode(identifier)
+            self._marks = [m for m in self._marks if m.timecode != target]
+        except Exception:
+            pass
 
     def marks(self) -> Iterable[VideoMark]:
         return tuple(self._marks)
 
     def to_string(self) -> str:
         return "\n".join(
-            f"[{m.timecode}] {m.label}" for m in self._marks
+            f"[{format_timecode(m.timecode)}] {m.label}" for m in self._marks
         ) 

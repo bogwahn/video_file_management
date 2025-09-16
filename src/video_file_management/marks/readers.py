@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from .chapters_file import ChaptersFile
+from ..utils.timecode import parse_timecode
 
 
 class ChaptersFileReader:
@@ -25,10 +26,13 @@ class ChaptersFileReader:
             if raw.startswith("[") and "]" in raw:
                 try:
                     close_idx = raw.index("]")
-                    timecode = raw[1:close_idx]
+                    timecode_str = raw[1:close_idx]
                     label = raw[close_idx + 1:].strip()
-                    if timecode and label:
-                        chapters.add(timecode, label)
+                    if timecode_str and label:
+                        # Parse to validate. The add() method will parse again
+                        # when constructing the VideoMark instance.
+                        parse_timecode(timecode_str)
+                        chapters.add(timecode_str, label)
                 except ValueError:
                     continue
         return chapters 
