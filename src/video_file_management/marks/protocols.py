@@ -11,6 +11,8 @@ class VideoMarksFile(Protocol):
     Implementations decide how marks are formatted when serialized.
     """
 
+    file_path: str
+
     def add(self, timecode: str, label: str) -> None:
         ...
 
