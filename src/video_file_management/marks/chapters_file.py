@@ -9,7 +9,7 @@ from .protocols import VideoMarksFile
 class ChaptersFile(VideoMarksFile):
     """Concrete marks container for chapters.
 
-    Serializes as "[{time:HH:MM:SS.mmm}] Label" lines.
+    Serializes as "[HH:MM:SS.mmm] Label" lines.
     """
 
     def __init__(self, file_path: str) -> None:
@@ -34,5 +34,5 @@ class ChaptersFile(VideoMarksFile):
 
     def to_string(self) -> str:
         return "\n".join(
-            f"[{{time:{m.timecode}}}] {m.label}" for m in self._marks
+            f"[{m.timecode}] {m.label}" for m in self._marks
         ) 

@@ -8,7 +8,7 @@ from .chapters_file import ChaptersFile
 class ChaptersFileReader:
     """Reads a chapters file into a ChaptersFile instance.
 
-    Expected line format: "[{time:HH:MM:SS.mmm}] Label"
+    Expected line format: "[HH:MM:SS.mmm] Label"
     Lines not matching the expected format are ignored.
     """
 
@@ -22,13 +22,13 @@ class ChaptersFileReader:
             raw = raw.strip()
             if not raw:
                 continue
-            if raw.startswith("[{time:") and "]" in raw:
-                # Extract between "[{time:" and "]"
+            if raw.startswith("[") and "]" in raw:
                 try:
-                    prefix, label = raw.split("]", 1)
-                    timecode = prefix[len("[{time:"):]
-                    label = label.strip()
-                    chapters.add(timecode, label)
+                    close_idx = raw.index("]")
+                    timecode = raw[1:close_idx]
+                    label = raw[close_idx + 1:].strip()
+                    if timecode and label:
+                        chapters.add(timecode, label)
                 except ValueError:
                     continue
         return chapters 
