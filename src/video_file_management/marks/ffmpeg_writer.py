@@ -13,7 +13,7 @@ def generate_ffmetadata(chapters: VideoMarksFile, video_duration_ms: int) -> str
     """Generate ffmpeg ffmetadata format from chapters.
     
     Returns text content ready to write to a .ffmetadata file.
-    Chapter markers only need START times, not ranges.
+    Using START=END creates point markers instead of ranges.
     """
     marks = list(chapters.marks())
     if not marks:
@@ -30,6 +30,7 @@ def generate_ffmetadata(chapters: VideoMarksFile, video_duration_ms: int) -> str
             "[CHAPTER]",
             "TIMEBASE=1/1000",
             f"START={start_ms}",
+            f"END={start_ms}",
             f"title={mark.label}",
         ])
     
@@ -89,13 +90,11 @@ class FFmpegChapterWriter:
             # Write ffmetadata file
             ffmetadata_file.write_text(ffmetadata_content, encoding="utf-8")
             
-            # Use ffmpeg to add chapters
+            # Use simplified ffmpeg command - let it handle chapters automatically
             cmd = [
                 "ffmpeg", "-hide_banner", "-loglevel", "error",
                 "-i", str(video),
                 "-i", str(ffmetadata_file),
-                "-map", "0",
-                "-map_chapters", "1",
                 "-c", "copy",
                 "-y", str(temp_video)
             ]
