@@ -14,6 +14,7 @@ def generate_ffmetadata(chapters: VideoMarksFile, video_duration_ms: int) -> str
     
     Returns text content ready to write to a .ffmetadata file.
     Using START=END creates point markers instead of ranges.
+    Adds initial chapter at 0:00:00 so user chapters start at correct times.
     """
     marks = list(chapters.marks())
     if not marks:
@@ -21,6 +22,19 @@ def generate_ffmetadata(chapters: VideoMarksFile, video_duration_ms: int) -> str
     
     lines = [";FFMETADATA1"]
     
+    # Add initial chapter at 0:00:00 if first user chapter isn't at start
+    first_mark_ms = int(
+        parse_timecode(f"{marks[0].timecode}").total_seconds() * 1000
+    )
+    if first_mark_ms > 0:
+        lines.extend([
+            "[CHAPTER]",
+            "TIMEBASE=1/1000",
+            "START=0",
+            "END=0",
+        ])
+    
+    # Add user chapters
     for mark in marks:
         start_ms = int(
             parse_timecode(f"{mark.timecode}").total_seconds() * 1000
