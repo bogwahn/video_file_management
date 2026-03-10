@@ -1,0 +1,32 @@
+{
+  "www.example.com": {
+    "selectors": [
+      {
+        "name": "actors",
+        "css": ".cast .actor",
+        "attr": "text",
+        "multi": true
+      },
+      {
+        "name": "studio",
+        "css": ".studio a",
+        "attr": "text"
+      },
+      {
+        "name": "title",
+        "css": "h1.video-title",
+        "attr": "text"
+      },
+      {
+        "name": "resolution",
+        "css": ".quality-picker .active",
+        "attr": "text"
+      },
+      {
+        "name": "downloadUrl",
+        "css": "a.download",
+        "attr": "href"
+      }
+    ]
+  }
+}

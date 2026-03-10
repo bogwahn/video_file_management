@@ -1,0 +1,15 @@
+{
+  "include": ["src", "tests"],
+  "exclude": [".venv", "venv", "build", "dist"],
+  "pythonVersion": "3.10",
+  "pythonPath": ".venv/bin/python",
+  "typeCheckingMode": "basic",
+  "reportPrivateImportUsage": false,
+  "reportUnusedImport": true,
+  "reportUnusedClass": true,
+  "reportUnusedFunction": true,
+  "reportUnusedVariable": true,
+  "reportMissingTypeStubs": false,
+  "reportIncompatibleMethodOverride": true,
+  "reportUnnecessaryIsInstance": true
+}

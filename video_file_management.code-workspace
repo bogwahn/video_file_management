@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"name": "video_file_management",
+			"path": "."
+		},
+		{
+			"path": "../../../../../../../../opt/homebrew/bin"
+		}
+	],
+	"settings": {}
+}

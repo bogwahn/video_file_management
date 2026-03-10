@@ -14,4 +14,4 @@ class VideoMark:
     """
 
     timecode: timedelta
-    label: str 
+    label: str

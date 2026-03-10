@@ -1,18 +1,19 @@
 from __future__ import annotations
 
-from pathlib import Path
-import subprocess
 import shutil
+import subprocess
 import tempfile
+from pathlib import Path
+from typing import Any, MutableMapping, cast
+
+from ..utils.timecode import format_timecode
+from .protocols import VideoMarksFile
 
 try:
-    import xattr  # type: ignore
+    import xattr as _xattr  # type: ignore
 except Exception:  # pragma: no cover - optional dependency at runtime
-    xattr = None  # fallback for environments without xattr
-
-from .protocols import VideoMarksFile
-from ..utils.timecode import format_timecode
-
+    _xattr = None  # fallback for environments without xattr
+xattr = cast(Any, _xattr)
 
 XATTR_CHAPTERS_KEY = "com.video_file_management.chapters"
 
@@ -30,7 +31,7 @@ class ChapterMetadataWriter:
         text_value = chapters.to_string()
         if xattr is not None:
             data = text_value.encode("utf-8")
-            attrs = xattr.xattr(str(path))
+            attrs = cast(MutableMapping[str, bytes], xattr.xattr(str(path)))
             attrs[XATTR_CHAPTERS_KEY] = data
             return
         # Fallback to macOS CLI
@@ -66,6 +67,23 @@ def generate_nero_chapters_text(chapters: VideoMarksFile) -> str:
     return "\n".join(lines) + ("\n" if lines else "")
 
 
+def _replace_original(temp_result: Path, src: Path) -> None:
+    """Atomically replace source file with chaptered output."""
+    backup = src.with_suffix(src.suffix + ".bak")
+    try:
+        if backup.exists():
+            backup.unlink()
+        src.replace(backup)
+        temp_result.replace(src)
+        try:
+            backup.unlink()
+        except Exception:
+            pass
+    except Exception:
+        if backup.exists() and not src.exists():
+            backup.replace(src)
+
+
 class MP4ChaptersWriter:
     """Embed chapters into MP4 using MP4Box (Nero iTunes-style chapters).
 
@@ -74,7 +92,12 @@ class MP4ChaptersWriter:
       2) Convert marks to Nero format and import with MP4Box -chap
     """
 
-    def write(self, video_file_path: str, chapters: VideoMarksFile) -> None:
+    def write(
+        self,
+        video_file_path: str,
+        chapters: VideoMarksFile,
+        output_path: str | None = None,
+    ) -> None:
         mp4box = shutil.which("MP4Box")
         if not mp4box:
             return  # MP4Box not available
@@ -135,19 +158,8 @@ class MP4ChaptersWriter:
             except Exception:
                 return
 
-            # 4) Replace original atomically
-            backup = src.with_suffix(src.suffix + ".bak")
-            try:
-                if backup.exists():
-                    backup.unlink()
-                src.replace(backup)
-                out_path.replace(src)
-                try:
-                    backup.unlink()
-                except Exception:
-                    pass
-            except Exception:
-                # Attempt to restore backup if replacement failed
-                if backup.exists() and not src.exists():
-                    backup.replace(src)
-                return 
+            # 4) Place output at destination
+            if output_path:
+                shutil.copy2(str(out_path), output_path)
+            else:
+                _replace_original(out_path, src)

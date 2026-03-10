@@ -7,10 +7,13 @@ name = "video-file-management"
 version = "0.1.0"
 description = "OO library for video file management (metadata, marks, utils)."
 readme = "README.md"
-authors = [{name = "Your Name", email = "you@example.com"}]
+authors = [{name = "Andrew Vogel", email = "andrew@bogwahn.comm"}]
 license = {text = "MIT"}
 requires-python = ">=3.10"
 keywords = ["video", "metadata", "chapters", "bookmarks"]
+dependencies = [
+    "send2trash>=1.8.2",
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
@@ -18,9 +21,22 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [project.urls]
-Homepage = "https://github.com/yourusername/video_file_management"
-Issues = "https://github.com/yourusername/video_file_management/issues"
+Homepage = "https://github.com/bogwahn/video_file_management"
+Issues = "https://github.com/bogwahn/video_file_management/issues"
+
+[project.scripts]
+remux2mp4 = "video_file_management.cli.remux2mp4:main"
+bookmark_chapterize = "video_file_management.bookmark_chapterize:main"
+watch_bookmarks = "video_file_management.bookmark_watch:main"
+bookmarks2chapters = "video_file_management.bookmark_watch:main"
+chapter_cleanup = "video_file_management.chapter_cleanup:main"
+chapterfilewalker = "video_file_management.chapter_file_walker:main"
+chapterize = "video_file_management.chapterize.cli:main"
+watchForBookmarks = "video_file_management.bookmark_watch:main"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -28,18 +44,38 @@ testpaths = ["tests"]
 addopts = "-q"
 
 [tool.black]
-line-length = 100
+line-length = 120
 target-version = ["py310"]
 
 [tool.isort]
 profile = "black"
-line_length = 100
+line_length = 120
+skip_gitignore = true
 
 [tool.mypy]
 python_version = "3.10"
-ignore_missing_imports = true
-strict = false
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
 mypy_path = ["src"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C", "I"]
+ignore = ["E501"]  # Line too long (handled by formatter)
+
+[tool.bandit]
+tests = ["B201", "B301", "B302", "B303", "B304", "B305", "B306", "B307", "B308", "B309", "B310", "B311", "B312", "B313", "B314", "B315", "B316", "B317", "B318", "B319", "B320", "B321", "B322", "B323", "B324", "B325"]
+exclude_dirs = ["tests", "venv", ".venv"]
 
 [tool.coverage.run]
 branch = true

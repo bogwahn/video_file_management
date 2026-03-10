@@ -1,0 +1,11 @@
+concat(
+    translate(/html/body/div[3]/div[2]/div/div[2]/div[2]/div[1]/div/p[2]/a[1]/text()," ","."),".",
+    translate(/html/body/div[3]/div[2]/div/div[2]/div[2]/div[1]/div/p[3]/a/text()," ",""),".",
+    translate(/html/body/div[3]/div[1]/h1/text()," ","."),".4k"
+)
+
+concat(
+  translate(/html/body/div[1]/div/div[4]/div/div[4]/div/div[2]/div/div[1]/div[2]/p/span/a/text()," ","."),".",
+  translate(/html/body/div[1]/div/div[4]/div/div[4]/div/div[2]/div/div[1]/div[2]/a/text()," ",""),".",
+  translate(/html/body/div[1]/div/div[4]/div/div[4]/div/div[2]/div/div[1]/div[2]/h3/a/text()," ","."),".4k"
+)

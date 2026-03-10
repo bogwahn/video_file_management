@@ -16,14 +16,7 @@ def parse_timecode(value: str) -> timedelta:
         minutes = int(minutes_str)
         seconds = int(seconds_str)
         millis = int((millis_str + "000")[:3])
-        if (
-            minutes < 0
-            or minutes > 59
-            or seconds < 0
-            or seconds > 59
-            or millis < 0
-            or millis > 999
-        ):
+        if minutes < 0 or minutes > 59 or seconds < 0 or seconds > 59 or millis < 0 or millis > 999:
             raise ValueError
         return timedelta(
             hours=hours,
@@ -41,4 +34,4 @@ def format_timecode(delta: timedelta) -> str:
     hours, rem_ms = divmod(total_ms, 3600 * 1000)
     minutes, rem_ms = divmod(rem_ms, 60 * 1000)
     seconds, millis = divmod(rem_ms, 1000)
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}.{millis:03d}" 
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}.{millis:03d}"

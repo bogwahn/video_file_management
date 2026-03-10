@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from typing import Iterable, List
 
+from ..utils.timecode import format_timecode, parse_timecode
 from .models import VideoMark
 from .protocols import VideoMarksFile
-from ..utils.timecode import parse_timecode, format_timecode
 
 
 class ChaptersFile(VideoMarksFile):
     """Concrete marks container for chapters.
-
     Serializes as "[HH:MM:SS.mmm] Label" lines.
     """
 
@@ -31,13 +30,11 @@ class ChaptersFile(VideoMarksFile):
         try:
             target = parse_timecode(identifier)
             self._marks = [m for m in self._marks if m.timecode != target]
-        except Exception:
+        except ValueError:
             pass
 
     def marks(self) -> Iterable[VideoMark]:
         return tuple(self._marks)
 
     def to_string(self) -> str:
-        return "\n".join(
-            f"[{format_timecode(m.timecode)}] {m.label}" for m in self._marks
-        ) 
+        return "\n".join(f"[{format_timecode(m.timecode)}] {m.label}" for m in self._marks)
