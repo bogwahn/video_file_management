@@ -17,22 +17,10 @@ from .marks.writers import MP4ChaptersWriter
 from .tag_reader import read_finder_tags
 
 DEFAULT_BOOKMARKS_DIR = (
-    Path.home()
-    / "Library"
-    / "Mobile Documents"
-    / "com~apple~CloudDocs"
-    / "Personal"
-    / "Zetc"
-    / "Bookmarks"
+    Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "Personal" / "Zetc" / "Bookmarks"
 )
 DEFAULT_CHAPTERS_DIR = (
-    Path.home()
-    / "Library"
-    / "Mobile Documents"
-    / "com~apple~CloudDocs"
-    / "Personal"
-    / "Zetc"
-    / "Chapters"
+    Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "Personal" / "Zetc" / "Chapters"
 )
 DEFAULT_VIDEO_DIRS = (
     Path("/Volumes/Zetc"),
@@ -345,9 +333,7 @@ def _check_embed_tools() -> Optional[str]:
     return None
 
 
-def _embed_chapters_in_place(
-    video_path: Path, chapters: VideoMarksFile
-) -> Tuple[bool, Optional[str]]:
+def _embed_chapters_in_place(video_path: Path, chapters: VideoMarksFile) -> Tuple[bool, Optional[str]]:
     expected_count = len(tuple(chapters.marks()))
     temp_output = video_path.with_name(f"{video_path.stem}.chaptered{video_path.suffix}")
     writer = MP4ChaptersWriter()

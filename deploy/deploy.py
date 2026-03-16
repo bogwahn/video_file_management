@@ -6,7 +6,6 @@ It installs the python package, copies shell wrappers, and directly populates
 macOS Automator Workflows into ~/Library/Services/.
 """
 
-import os
 import shutil
 import subprocess
 import sys
@@ -148,10 +147,10 @@ def create_automator_workflow(name: str, shell_command: str, output_dir: Path) -
     # Ensure a clean state
     if workflow_path.exists():
         shutil.rmtree(workflow_path)
-        
+
     contents_path = workflow_path / "Contents"
     contents_path.mkdir(parents=True)
-    
+
     wflow_file = contents_path / "document.wflow"
     wflow_file.write_text(wflow_content)
     print(f"Created Quick Action: {workflow_path}")
@@ -160,36 +159,36 @@ def create_automator_workflow(name: str, shell_command: str, output_dir: Path) -
 def main() -> None:
     project_root = Path(__file__).parent.parent.absolute()
     home_dir = Path.home()
-    
+
     print("=== Deploying Video Tools ===")
-    
+
     print("\n1. Installing Python Backend locally...")
     # Ensures python dependencies, including `pytest` and basic cli commands
     execute([sys.executable, "-m", "pip", "install", "-e", "."], cwd=project_root)
-    
+
     print("\n2. Configuring wrapper scripts in ~/bin...")
     bin_dir = home_dir / "bin"
     bin_dir.mkdir(parents=True, exist_ok=True)
-    
+
     for script_name in ["remux-to-mp4.sh", "chapterize-video.sh"]:
         source = project_root / "quickactions" / script_name
         dest = bin_dir / script_name.replace(".sh", "")
         shutil.copy2(source, dest)
         dest.chmod(0o755)
         print(f"Installed {dest}")
-        
+
     print("\n3. Generating and Installing macOS Automator Workflows...")
     services_dir = home_dir / "Library" / "Services"
     services_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # 3a. Remux Video
     remux_command = 'source ~/.zprofile 2>/dev/null; source ~/.zshrc 2>/dev/null;\n"$HOME/bin/remux-to-mp4" "$@"'
     create_automator_workflow("Remux to MP4 (Copy)", remux_command, services_dir)
-    
+
     # 3b. Chapterize Video
     chap_command = 'source ~/.zprofile 2>/dev/null; source ~/.zshrc 2>/dev/null;\n"$HOME/bin/chapterize-video" "$@"'
     create_automator_workflow("Chapterize Video", chap_command, services_dir)
-    
+
     print("\n=== Deployment Complete ===")
 
 

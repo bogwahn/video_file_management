@@ -63,9 +63,7 @@ class UserPromptStrategy(Protocol):
 class ChapterMergeStrategy(Protocol):
     """Strategy for merging two sets of marks."""
 
-    def merge(
-        self, existing: Iterable[VideoMark], new: Iterable[VideoMark]
-    ) -> Iterable[VideoMark]:
+    def merge(self, existing: Iterable[VideoMark], new: Iterable[VideoMark]) -> Iterable[VideoMark]:
         """Combines two sets of marks, resolving chronological overlaps.
 
         Args:

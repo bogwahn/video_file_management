@@ -24,7 +24,7 @@ class RecursiveNASDiscovery(VideoDiscoveryStrategy):
         """Normalizes a filename stem for fuzzy matching (case-insensitive, dots/spaces/hyphens interchangeable)."""
         return name.lower().replace(".", " ").replace("_", " ").replace("-", " ").strip()
 
-    def find_video(self, bookmark_path: str) -> str | None:
+    def find_video(self, bookmark_path: str) -> str | None:  # noqa: C901
         """Recursively scans the configured directories for a video matching the bookmark stem.
 
         Uses fuzzy matching: ignores case and treats '.' and ' ' interchangeably.
@@ -54,7 +54,7 @@ class RecursiveNASDiscovery(VideoDiscoveryStrategy):
         for root_dir in self.search_directories:
             if not root_dir.exists() or not root_dir.is_dir():
                 continue
-                
+
             for currentpath, dirnames, filenames in os.walk(root_dir):
                 # Modify dirnames in-place to prune excluded directories from the walk tree
                 dirnames[:] = [d for d in dirnames if d not in self.ignore_dirs]

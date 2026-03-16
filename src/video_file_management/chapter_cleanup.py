@@ -11,13 +11,7 @@ from .chapter_reader import read_chapters
 from .utils.timecode import format_timecode, parse_timecode
 
 DEFAULT_CHAPTERS_DIR = (
-    Path.home()
-    / "Library"
-    / "Mobile Documents"
-    / "com~apple~CloudDocs"
-    / "Personal"
-    / "Zetc"
-    / "Chapters"
+    Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "Personal" / "Zetc" / "Chapters"
 )
 DEFAULT_VIDEO_DIRS = (
     Path("/Volumes/Zetc"),
@@ -115,9 +109,7 @@ def analyze_video_chapters(
             )
             continue
         entries = read_result.chapters
-        normalized = [
-            (_normalize_time_seconds(e.start_seconds), _normalize_label(e.title)) for e in entries
-        ]
+        normalized = [(_normalize_time_seconds(e.start_seconds), _normalize_label(e.title)) for e in entries]
         block_len, repeat_count = _find_repeated_block(normalized)
         duplicate_pairs = _count_duplicates(normalized)
         message_parts = [f"{len(entries)} chapter(s)"]
@@ -141,11 +133,7 @@ def analyze_video_chapters(
 def _iter_chapter_files(chapters_dir: Path) -> Iterable[Path]:
     if not chapters_dir.exists():
         return []
-    return (
-        path
-        for path in chapters_dir.rglob("*.txt")
-        if path.is_file() and not _should_skip_path(path)
-    )
+    return (path for path in chapters_dir.rglob("*.txt") if path.is_file() and not _should_skip_path(path))
 
 
 def _read_chapter_lines(path: Path) -> List[ChapterLine]:

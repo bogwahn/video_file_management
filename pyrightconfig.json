@@ -1,8 +1,9 @@
 {
   "include": ["src", "tests"],
   "exclude": [".venv", "venv", "build", "dist"],
+  "venvPath": ".",
+  "venv": ".venv",
   "pythonVersion": "3.10",
-  "pythonPath": ".venv/bin/python",
   "typeCheckingMode": "basic",
   "reportPrivateImportUsage": false,
   "reportUnusedImport": true,

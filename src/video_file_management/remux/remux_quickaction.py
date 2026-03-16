@@ -1,5 +1,4 @@
 import argparse
-import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -16,16 +15,17 @@ LOG_FILE = LOG_DIR / "remux-to-mp4.log"
 
 def _notify(message: str) -> None:
     try:
-        escaped_message = message.replace('"', '\\"')
+        escaped = message.replace('"', '\\"')
         # subprocess.run(
         #     [
         #         "/usr/bin/osascript",
         #         "-e",
-        #         f'display notification "{escaped_message}" with title "{TITLE}"',
+        #         f'display notification "{escaped}" with title "{TITLE}"',
         #     ],
         #     check=False,
         #     capture_output=True,
         # )
+        _ = escaped
     except Exception:
         return
 

@@ -7,19 +7,11 @@ from pathlib import Path
 from typing import Any, Iterable, List, Optional
 
 DEFAULT_CHAPTERS_DIR = (
-    Path.home()
-    / "Library"
-    / "Mobile Documents"
-    / "com~apple~CloudDocs"
-    / "Personal"
-    / "Zetc"
-    / "Chapters"
+    Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "Personal" / "Zetc" / "Chapters"
 )
 
 
-def find_chapters_file_for(
-    video_path: Path, chapters_dir: Path = DEFAULT_CHAPTERS_DIR
-) -> Optional[Path]:
+def find_chapters_file_for(video_path: Path, chapters_dir: Path = DEFAULT_CHAPTERS_DIR) -> Optional[Path]:
     """Try to locate a chapters file for `video_path` in `chapters_dir`.
 
     Strategy:
@@ -217,20 +209,14 @@ def process_files(
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(prog="chapterize")
     parser.add_argument("paths", nargs="+", help="Files or directories to process")
-    parser.add_argument(
-        "--queue-size", type=int, default=100, help="Batch size for conversion queue"
-    )
-    parser.add_argument(
-        "--test-mode", action="store_true", help="Limit processing to 10 files for testing"
-    )
+    parser.add_argument("--queue-size", type=int, default=100, help="Batch size for conversion queue")
+    parser.add_argument("--test-mode", action="store_true", help="Limit processing to 10 files for testing")
     parser.add_argument(
         "--non-interactive",
         action="store_true",
         help="Do not prompt between batches (finish automatically)",
     )
-    parser.add_argument(
-        "--chapters-dir", default=str(DEFAULT_CHAPTERS_DIR), help="Chapters directory to search"
-    )
+    parser.add_argument("--chapters-dir", default=str(DEFAULT_CHAPTERS_DIR), help="Chapters directory to search")
 
     args = parser.parse_args(argv)
 

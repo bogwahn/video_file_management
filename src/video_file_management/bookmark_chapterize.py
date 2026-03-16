@@ -12,9 +12,7 @@ from .marks.protocols import VideoMarksFile
 from .marks.writers import MP4ChaptersWriter
 
 DEFAULT_FINDER_TAG = "Scenes:Chapters"
-DEFAULT_ZETC_DIR = (
-    Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "Personal" / "Zetc"
-)
+DEFAULT_ZETC_DIR = Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "Personal" / "Zetc"
 DEFAULT_VIDEO_DIRS = (
     DEFAULT_ZETC_DIR,
     Path.home() / "Movies",

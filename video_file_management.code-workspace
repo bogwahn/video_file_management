@@ -8,5 +8,7 @@
 			"path": "../../../../../../../../opt/homebrew/bin"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"vscode-as-git-mergetool.settingsAssistantOnStartup": false
+	}
 }

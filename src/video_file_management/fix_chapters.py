@@ -186,9 +186,7 @@ def main_cli(argv: Optional[List[str]] = None) -> int:
             r = fix_file(f)
             if r:
                 reports.append(r)
-                print(
-                    f"Fixed: {r['path']} removed={r['removed']} kept={r['kept']} tag_added={r['tag_added']}"
-                )
+                print(f"Fixed: {r['path']} removed={r['removed']} kept={r['kept']} tag_added={r['tag_added']}")
         except Exception as exc:
             print(f"Error processing {f}: {exc}")
 

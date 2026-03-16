@@ -1,235 +1,191 @@
-# chapterize — Execution Plan
+# chapterize — CLI Design and Execution Plan
 
-## Status
+## Purpose
 
-**Current Phase:** Refactoring procedural implementation to OO architecture
+Build and maintain a componentized CLI command `chapterize` that processes zero-or-more file and directory inputs, resolves video/marks relationships, and writes chapters with explicit user conflict resolution.
 
-**Completed:**
+This plan is CLI-only and does not depend on macOS UI dialogs.
 
-- ✅ Working procedural implementation with batch processing
-- ✅ Protocol-based `marks/` module with readers/writers
-- ✅ Interactive batch prompts and conversion support
+## Non-Negotiable Constraints
 
-**In Progress:**
+### 1) Allowed Video Search Roots (Only)
 
-- 🔄 Refactor to object-oriented architecture with DI
-- 🔄 Separate Controllers from Execution logic
-- 🔄 Add comprehensive unit tests
+The command may search for corresponding video files only under these roots:
 
-## Overview
+- /Volumes/Zetc/Models
+- /Volumes/Zetc/Studios
+- /Volumes/Zetc/Uncategorized
+- /Volumes/Zetc-1/Models
+- /Volumes/Zetc-1/Studios
+- /Volumes/Zetc-1/Uncategorized
+- /Volumes/Torrents/Complete/Zetc
+- /Volumes/TorrentsOld/Complete/Zetc
+- /Volumes/Internal
+- /Volumes/External
 
-`chapterize` is a focused function/CLI that provides the ability to add chapters to a videofile by applying the contents
-of a chapter or bookmark file. `chapterize` should handle the following scenarios:
+No fallback directories are allowed for corresponding video discovery.
 
-- Given a filename and an available chapters/bookmarks file, `chapterize` attaches a chapters track and reports a
-summary message.
-- Given a list of video filenames, a corresponding chapter file or bookmark file will be searched for each video. If
-found, the chapters will be embedded and reports an aggregate summary message.
+### 2) Recursive Search
 
-## Requirements
+All allowed roots above are searched recursively.
 
-- Code must be in Python 3.14 or later.
-- Must be organized and designed as an object oriented module with clear separation of concerns.
-- Controllers should orchestrate the flow of data and handle user interactions
-- Execution objects should focus on the core logic of chapterizing files.
-- Execution objects should be designed to be reusable and testable, with clear input/output interfaces.
-- Unit tests should be written for all components, with a focus on testing the execution logic in isolation from the CLI
-and user interactions.
-- Follow the principles of object-oriented design, including but not limited to:
-  1. Favor composition over inheritance
-  2. Program to a protocol, not an implementation
-  3. Objects should be open for extension but closed for modification (Open/Closed Principle)
-  4. Single Responsibility Principle: Each class should have only one reason to change, meaning it should have only one
-  job or responsibility.
-  5. Dependency Inversion Principle: High-level modules should not depend on low-level modules. Both should depend on
-  protocols and ABCs (Abstract Base Classes). If an ABC is determined to be useful, it should implement a protocol.
-  If no protocol exists, create it.
-  6. Liskov Substitution Principle: Children of a superclass and classes implementing protocols should be replaceable
-   with objects of a sub or implementing class without affecting the correctness of the program.
-  7. Interface Segregation Principle: Clients should not be forced to depend on interfaces they do not use.
-  8. Use dependency injection to manage dependencies between classes.
-  9. **When runtime decisions are needed, inject creational patterns (factories, builders) via DI**
+### 3) Marks Directories
 
-## Success Criteria
+- Chapters: /Users/bogwahn/Library/Mobile Documents/com~apple~CloudDocs/Personal/Zetc/Chapters
+- Bookmarks: /Users/bogwahn/Library/Mobile Documents/com~apple~CloudDocs/Personal/Zetc/Bookmarks
 
-- Given a video filename and an available chapters/bookmarks file, `chapterize` attaches a chapters track and reports a summary message.
-- Given a list of video files, chapters are embedded for each file with available chapters/bookmarks
-- Returns structured results (success/failure/skipped) with clear summary reporting
-- Returns a non-zero exit code and a clear message if no chapters/bookmarks files are supplied or found.
-- Architecture follows OO principles with clear Controller/Service separation
-- Dependencies injected via constructors; factories handle runtime decisions
-- Comprehensive unit tests covering all components and edge cases
+Lookup order for a video input is always:
 
-## Scope
+1. Chapters
+2. Bookmarks
 
-- Command-line interface and library API that processes one or more files
-- Reuses parsers and embedding helpers from `marks/` module
-- Must not contain business logic in the CLI layer—only orchestration
-- Follows existing project patterns in `remux2mp4` and `chapter_file_walker`
+### 4) Conflict Resolution Semantics
 
-## Tasks
+If video already has chapters, show a two-column terminal comparison:
 
-### Phase 1: Define Protocols and Models
+1. Text file chapters/bookmarks
+2. Existing video chapters
 
-1. Create result models: `ChapterizeResult`, `ProcessingStatus` (enum: Success, Failed, Skipped)
-2. Define protocols:
-   - `ChaptersLocator` - finds chapters files for videos
-   - `VideoConverter` - converts non-MP4 formats
-   - `ChaptersEmbedder` - embeds chapters into video files
-   - `ChaptersReaderFactory` - creates appropriate reader based on file type
+Then prompt for:
 
-### Phase 2: Implement Core Services
+1. Keep
+2. Replace
+3. Merge
 
-1. Implement `ChaptersLocatorService` (wraps current `find_chapters_file_for`)
-2. Implement `VideoConverterService` (wraps current `convert_to_mp4`)  
-3. Implement `ChaptersEmbedderService` (orchestrates reader selection + writer)
-4. Implement `ChaptersReaderFactory` for runtime reader selection
+Merge rule: deduplicate by timecode only.
 
-### Phase 3: Build Controller Layer
+## Current Architecture (Implemented)
 
-1. Implement `ChapterizeController`:
-   - Accepts services via DI
-   - Orchestrates: locate → convert (if needed) → embed
-   - Returns structured `ChapterizeResult` objects
-   - No direct subprocess calls or business logic
-2. Implement batch processing with queue semantics
-3. Add interactive prompt handler (separate concern)
+Implemented componentized CLI in `src/video_file_management/chapterize/cli.py`:
 
-### Phase 4: CLI and Integration
+1. `FileKindDetector`: identifies `video`, `bookmarks`, `chapters`, `unknown`
+2. `MarksLoader`: reads bookmarks/chapters files into marks model
+3. `PathMatchIndex`: indexes Chapters/Bookmarks dirs and resolves best match for video stem
+4. `VideoLocator`: searches only configured roots recursively
+5. `CLIVideoReaderStrategy`: reads existing video chapters from metadata
+6. `CLIVideoWriterStrategy`: writes chapters into target video
+7. `MergeService`: merges and deduplicates by timecode
+8. `CLIUserPromptStrategy`: renders two-column preview and prompts Keep/Replace/Merge
+9. `ChapterizeCommand`: orchestrates end-to-end workflow via DI/composition
 
-1. Refactor `main()` to wire dependencies and delegate to controller
-2. Add `chapterize` entry point to `pyproject.toml`
-3. Create composition root for DI container setup
+## Workflow
 
-### Phase 5: Testing
+### Input handling
 
-1. Write unit tests for each service (with mocks)
-2. Write unit tests for controller (with test doubles)
-3. Write integration tests for CLI
-4. Write tests for result aggregation and reporting
+1. Accept zero or more paths.
+2. If paths are omitted, scan configured video roots recursively.
+3. Expand directories recursively into file candidates.
 
-## Example CLI
+### Per-item processing
+
+1. Detect file kind.
+2. If input is a video:
+    1. Find matching chapters in Chapters dir.
+    2. If missing, find matching bookmarks in Bookmarks dir.
+3. If input is bookmarks/chapters:
+    1. Resolve corresponding video by searching allowed video roots recursively.
+4. Load incoming marks from text file.
+5. Read existing embedded video chapters.
+6. If existing chapters present:
+    1. Show two-column preview.
+    2. Prompt Keep/Replace/Merge.
+7. Write selected final marks to video.
+8. Return structured result entry for summary and exit-code calculation.
+
+## CLI Behavior Contract
+
+### Command
 
 ```bash
-# Single file (auto-locates chapters file)
-chapterize video1.mp4
-
-# Multiple files
-chapterize video1.mp4 video2.mov --dry-run
-
-# Directory processing
-chapterize --directory /path/to/videos
-
-# With options
-chapterize video1.mp4 --queue-size 50 --test-mode --non-interactive
+chapterize [paths ...] [--non-interactive]
 ```
 
-## Estimates
+### Flags
 
-- **Phase 1 (Protocols/Models):** 2-3 hours
-- **Phase 2 (Services):** 4-6 hours  
-- **Phase 3 (Controller):** 4-5 hours
-- **Phase 4 (CLI):** 2-3 hours
-- **Phase 5 (Testing):** 6-8 hours
+1. `paths ...`:
+    1. Optional.
+    2. Files and directories.
+    3. Directories are recursive.
+2. `--non-interactive`:
+    1. Skip prompt.
+    2. Conflict policy defaults to Replace.
 
-**Total:** 2-3 days
+### Exit codes
 
-## Next Steps
+1. `0`: at least one file processed successfully.
+2. `1`: nothing processed or fatal input-level failure.
 
-1. Review and approve this updated plan
-2. Start with Phase 1: Define protocols and result models
-3. Create a feature branch for the refactoring work
-4. Implement incrementally with tests at each phase
+## Testing Plan
 
-## Queueing, conversion and test-mode (applies to CLI)
+### Already added
 
-When used as a CLI or library for batch operations, `chapterize` should support the same priority and conversion semantics as the walker/service:
+`tests/unit/features/chapterize/test_cli_components.py`
 
-- Process MP4/MOV files immediately for embedding; queue non-MP4 files for conversion to MP4 first.
-- Support a `--queue-size` option (default `100`) to control batching.
-- Provide an interactive prompt after each batch: `continue`, `quit`, or `finish`. Add `--non-interactive` for scripted runs.
-- Provide `--test-mode` to limit processing to `10` files for safe testing.
+1. File-kind detection (bookmarks vs chapters)
+2. Chapters preferred over bookmarks for same video stem
+3. Merge dedupe by timecode only
 
-These flags make `chapterize` a safe building block for automated and interactive workflows.
+### Next tests
 
-## Architectural Design
+1. Unit test: `VideoLocator` enforces strict root allowlist
+2. Unit test: no out-of-allowlist fallback for marks-to-video lookup
+3. Unit test: two-column prompt formatting for conflicts
+4. Integration-style test: orchestration for video input and marks input with mocked writer
 
-### Component Structure
+## Implementation Status
 
-```text
-┌────────────────────────────────────────┐
-│           CLI Layer (main)             │
-│  - Argument parsing                    │
-│  - Dependency wiring (composition root)│
-│  - Result formatting & exit codes      │
-└────────────┬───────────────────────────┘
-             │
-             ▼
-┌────────────────────────────────────────┐
-│      ChapterizeController              │
-│  - Orchestrates workflow               │
-│  - Batch management                    │
-│  - Progress reporting                  │
-└────────────┬───────────────────────────┘
-             │
-             │  Injected Dependencies
-             ├──────────────────────────┐
-             │                          │
-             ▼                          ▼
-┌─────────────────────┐   ┌──────────────────────┐
-│ ChaptersLocator     │   │ ChaptersEmbedder     │
-│  (service)          │   │  (service)           │
-└─────────────────────┘   └──────────┬───────────┘
-                                     │
-             ┌───────────────────────┴────────────┐
-             ▼                                    ▼
-┌──────────────────────┐            ┌──────────────────────┐
-│ VideoConverter       │            │ ChaptersReaderFactory│
-│  (service)           │            │  (factory - DI)      │
-└──────────────────────┘            └──────────┬───────────┘
-                                               │
-                                     ┌─────────┴─────────┐
-                                     ▼                   ▼
-                        ┌───────────────────┐ ┌──────────────────┐
-                        │ChaptersFileReader │ │BookmarksFileReader│
-                        └───────────────────┘ └──────────────────┘
-```
+As of 2026-03-16:
 
-### Key Principles in Design
+### Done
 
-1. **Controller has no business logic** — only orchestration
-2. **Services injected via constructor** — testable with mocks
-3. **Factory injected for runtime decisions** — determines reader type based on file extension
-4. **Protocols define contracts** — implementations can vary
-5. **Results flow up** — structured data, not side effects
+1. Componentized CLI orchestration in `src/video_file_management/chapterize/cli.py`.
+2. Strict video-root allowlist configuration for matching video discovery.
+3. Recursive traversal in configured roots and user-provided directories.
+4. Chapters-first, Bookmarks-second lookup order for video inputs.
+5. Terminal Keep/Replace/Merge conflict resolution flow.
+6. Merge dedupe by timecode-only semantics.
+7. Initial component tests in `tests/unit/features/chapterize/test_cli_components.py`.
 
-### Example Wiring (Composition Root)
+### In Progress
 
-```python
-def create_controller() -> ChapterizeController:
-    # Create concrete services
-    locator = ChaptersLocatorService(DEFAULT_CHAPTERS_DIR)
-    converter = VideoConverterService()
-    reader_factory = ChaptersReaderFactory()
-    writer = MP4ChaptersWriter()
-    
-    # Inject factory into embedder
-    embedder = ChaptersEmbedderService(
-        reader_factory=reader_factory,
-        writer=writer
-    )
-    
-    # Inject all into controller
-    return ChapterizeController(
-        locator=locator,
-        converter=converter,
-        embedder=embedder
-    )
-```
+1. Full orchestration tests for mixed input kinds and summary/exit-code behavior.
 
-This design ensures:
+### Next
 
-- ✅ Dependencies are explicit and testable
-- ✅ Runtime decisions (reader selection) use injected factories
-- ✅ Each class has a single, clear responsibility
-- ✅ Easy to swap implementations via protocols
+1. Add remaining orchestration tests with mocked reader/writer/prompt dependencies.
+2. Add explicit allowlist-enforcement tests for `VideoLocator`.
+3. Add terminal prompt-format tests to lock conflict-preview output.
+
+## Execution Phases
+
+### Phase A: Lock in invariants
+
+1. Keep strict configured roots immutable in command composition root.
+2. Keep recursive traversal for configured roots and directory inputs.
+3. Keep lookup order Chapters then Bookmarks.
+
+### Phase B: Complete behavior tests
+
+1. Add missing orchestration tests listed above.
+2. Validate result summaries and exit codes under mixed processed/skipped sets.
+
+### Phase C: CLI polish
+
+1. Tighten summary output format for scanability.
+2. Add small `--dry-run` option if needed (no write, full resolution and prompt path).
+
+## Risks and Mitigations
+
+1. Module-name ambiguity between `chapterize.py` and `chapterize/` package can confuse static tools.
+    1. Mitigation: keep tests importing CLI module via explicit dynamic import where needed.
+2. External tools (`ffmpeg`, `MP4Box`) might be unavailable in runtime environments.
+    1. Mitigation: maintain clear write failure reporting and test with mocks for core orchestration.
+
+## Definition of Done
+
+1. CLI processes zero-or-more paths and directories recursively.
+2. Corresponding video search is restricted to allowed roots only.
+3. Video input path resolves Chapters first, then Bookmarks.
+4. Conflict prompt supports Keep/Replace/Merge in terminal.
+5. Merge dedupes by timecode only.
+6. Unit tests cover core components and orchestration edge cases.

@@ -13,13 +13,7 @@ from ..marks.readers import ChaptersFileReader
 from ..marks.writers import MP4ChaptersWriter
 
 DEFAULT_CHAPTERS_DIR = (
-    Path.home()
-    / "Library"
-    / "Mobile Documents"
-    / "com~apple~CloudDocs"
-    / "Personal"
-    / "Zetc"
-    / "Chapters"
+    Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "Personal" / "Zetc" / "Chapters"
 )
 
 
@@ -188,9 +182,7 @@ class ChaptersEmbedderService:
         self._reader_factory = reader_factory
         self._writer = writer
 
-    def embed(
-        self, video_path: Path, chapters_path: Path, dry_run: bool = False
-    ) -> bool:
+    def embed(self, video_path: Path, chapters_path: Path, dry_run: bool = False) -> bool:
         """Embed chapters from a chapters file into a video.
 
         Args:

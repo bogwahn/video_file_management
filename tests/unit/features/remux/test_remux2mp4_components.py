@@ -24,26 +24,30 @@ class FakeRunner(CommandRunner):
         self._stdout = stdout
         self._stderr = stderr
         self._returncode = returncode
-        self.last_args = None
+        self.last_args: list[str] | None = None
+        self.last_timeout: int | None = None
 
     def run(self, args, *, capture_output: bool = True, timeout=None) -> RunResult:
         self.last_args = list(args)
+        self.last_timeout = timeout
         return RunResult(stdout=self._stdout, stderr=self._stderr, returncode=self._returncode)
 
 
 def test_collect_input_files(tmp_path: Path) -> None:
     (tmp_path / "a.mkv").write_text("x")
     (tmp_path / "c.mpg").write_text("y")
+    (tmp_path / "d.f4v").write_text("w")
     sub = tmp_path / "nested"
     sub.mkdir()
     (sub / "b.mkv").write_text("z")
+    (sub / "e.f4v").write_text("q")
 
     collector = InputCollector()
     shallow = collector.collect(tmp_path, recursive=False)
     recursive = collector.collect(tmp_path, recursive=True)
 
-    assert sorted(p.name for p in shallow) == ["a.mkv", "c.mpg"]
-    assert sorted(p.name for p in recursive) == ["a.mkv", "b.mkv", "c.mpg"]
+    assert sorted(p.name for p in shallow) == ["a.mkv", "c.mpg", "d.f4v"]
+    assert sorted(p.name for p in recursive) == ["a.mkv", "b.mkv", "c.mpg", "d.f4v", "e.f4v"]
 
 
 def test_collect_rejects_non_mkv(tmp_path: Path) -> None:
@@ -87,6 +91,26 @@ def test_stream_probe_parses_json(tmp_path: Path) -> None:
         StreamInfo(index=0, codec_type="video", codec_name="h264"),
         StreamInfo(index=1, codec_type="audio", codec_name="aac"),
     )
+    assert runner.last_timeout == 30
+
+
+def test_executor_reports_timeout_as_failed(tmp_path: Path) -> None:
+    from video_file_management.remux.remux2mp4 import RemuxExecutor
+
+    runner = FakeRunner(returncode=124, stderr="command timed out after 900s")
+    executor = RemuxExecutor(runner=runner)
+    job = RemuxJob(
+        input_path=tmp_path / "in.f4v",
+        output_path=tmp_path / "out.mp4",
+        compatible=True,
+        warnings=(),
+    )
+
+    result = executor.remux(job, dry_run=False, verbose=False, log_file=None)
+
+    assert result.status == RemuxStatus.FAILED
+    assert "timed out" in result.message
+    assert runner.last_timeout == 900
 
 
 def test_compatibility_policy_reports_incompatible() -> None:

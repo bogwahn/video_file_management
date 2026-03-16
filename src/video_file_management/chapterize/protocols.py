@@ -74,9 +74,7 @@ class ChaptersEmbedder(Protocol):
     and writing them to a video file.
     """
 
-    def embed(
-        self, video_path: Path, chapters_path: Path, dry_run: bool = False
-    ) -> bool:
+    def embed(self, video_path: Path, chapters_path: Path, dry_run: bool = False) -> bool:
         """Embed chapters from a chapters file into a video.
 
         Args:

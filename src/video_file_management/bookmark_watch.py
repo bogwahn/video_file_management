@@ -15,22 +15,10 @@ from .marks.protocols import VideoMarksFile
 from .marks.writers import MP4ChaptersWriter
 
 DEFAULT_BOOKMARKS_DIR = (
-    Path.home()
-    / "Library"
-    / "Mobile Documents"
-    / "com~apple~CloudDocs"
-    / "Personal"
-    / "Zetc"
-    / "Bookmarks"
+    Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "Personal" / "Zetc" / "Bookmarks"
 )
 DEFAULT_CHAPTERS_DIR = (
-    Path.home()
-    / "Library"
-    / "Mobile Documents"
-    / "com~apple~CloudDocs"
-    / "Personal"
-    / "Zetc"
-    / "Chapters"
+    Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "Personal" / "Zetc" / "Chapters"
 )
 DEFAULT_VIDEO_DIRS = (
     Path("/Volumes/Zetc"),
@@ -180,11 +168,7 @@ def watch_bookmarks(
 def _iter_bookmark_files(bookmarks_dir: Path) -> Iterable[Path]:
     if not bookmarks_dir.exists():
         return []
-    return (
-        path
-        for path in bookmarks_dir.rglob("*.txt")
-        if path.is_file() and not _should_skip_path(path)
-    )
+    return (path for path in bookmarks_dir.rglob("*.txt") if path.is_file() and not _should_skip_path(path))
 
 
 def _read_bookmarks(bookmark_path: Path) -> VideoMarksFile:
@@ -277,9 +261,7 @@ def _pick_best_match(matches: Sequence[Path]) -> Path:
     return min(matches, key=lambda p: len(p.stem))
 
 
-def _embed_chapters_in_place(
-    video_path: Path, chapters: VideoMarksFile
-) -> Tuple[bool, Optional[str]]:
+def _embed_chapters_in_place(video_path: Path, chapters: VideoMarksFile) -> Tuple[bool, Optional[str]]:
     expected_count = len(tuple(chapters.marks()))
     temp_output = video_path.with_name(f"{video_path.stem}.chaptered{video_path.suffix}")
     writer = MP4ChaptersWriter()

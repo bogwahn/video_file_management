@@ -7,10 +7,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, Optional, Sequence, Tuple
+
 import send2trash
 
 VERSION = "1.1.0"
-SUPPORTED_INPUT_EXTENSIONS = frozenset({".mkv", ".mpg", ".mpeg"})
+SUPPORTED_INPUT_EXTENSIONS = frozenset({".mkv", ".mpg", ".mpeg", ".f4v"})
+FFPROBE_TIMEOUT_SECONDS = 30
+FFMPEG_TIMEOUT_SECONDS = 900
 
 
 @dataclass(frozen=True)
@@ -40,13 +43,22 @@ class CommandRunner:
         capture_output: bool = True,
         timeout: Optional[int] = None,
     ) -> RunResult:
-        result = subprocess.run(
-            list(args),
-            capture_output=capture_output,
-            text=True,
-            check=False,
-            timeout=timeout,
-        )
+        try:
+            result = subprocess.run(
+                list(args),
+                capture_output=capture_output,
+                text=True,
+                check=False,
+                timeout=timeout,
+            )
+        except subprocess.TimeoutExpired as exc:
+            stdout = exc.stdout or ""
+            stderr = exc.stderr or ""
+            if stderr:
+                stderr = f"{stderr}\n"
+            timeout_label = timeout if timeout is not None else "unknown"
+            stderr = f"{stderr}command timed out after {timeout_label}s"
+            return RunResult(stdout=stdout, stderr=stderr, returncode=124)
         stdout = result.stdout or ""
         stderr = result.stderr or ""
         return RunResult(stdout=stdout, stderr=stderr, returncode=result.returncode)
@@ -81,17 +93,9 @@ class InputCollector:
             return [base]
 
         if recursive:
-            paths = [
-                p
-                for p in base.rglob("*")
-                if p.is_file() and p.suffix.lower() in SUPPORTED_INPUT_EXTENSIONS
-            ]
+            paths = [p for p in base.rglob("*") if p.is_file() and p.suffix.lower() in SUPPORTED_INPUT_EXTENSIONS]
         else:
-            paths = [
-                p
-                for p in base.glob("*")
-                if p.is_file() and p.suffix.lower() in SUPPORTED_INPUT_EXTENSIONS
-            ]
+            paths = [p for p in base.glob("*") if p.is_file() and p.suffix.lower() in SUPPORTED_INPUT_EXTENSIONS]
 
         return sorted(paths, key=lambda p: str(p))
 
@@ -123,7 +127,7 @@ class StreamProbe:
             "json",
             str(path),
         ]
-        result = self.runner.run(cmd, capture_output=True)
+        result = self.runner.run(cmd, capture_output=True, timeout=FFPROBE_TIMEOUT_SECONDS)
         if result.returncode != 0 or not result.stdout:
             return ()
         try:
@@ -266,7 +270,7 @@ class RemuxExecutor:
             )
 
         cmd = self.command_builder.build(job, verbose=verbose)
-        result = self.runner.run(cmd, capture_output=not verbose)
+        result = self.runner.run(cmd, capture_output=not verbose, timeout=FFMPEG_TIMEOUT_SECONDS)
         if log_file is not None:
             log_file.parent.mkdir(parents=True, exist_ok=True)
             with log_file.open("a", encoding="utf-8") as handle:
@@ -282,7 +286,7 @@ class RemuxExecutor:
                     msg = "converted and trashed original"
                 except Exception as e:
                     msg = f"converted but failed to trash original: {e}"
-                
+
                 return RemuxResult(
                     input_path=job.input_path,
                     output_path=job.output_path,
@@ -305,7 +309,7 @@ class RemuxExecutor:
             input_path=job.input_path,
             output_path=job.output_path,
             status=RemuxStatus.FAILED,
-            message="ffmpeg failed",
+            message="ffmpeg timed out" if result.returncode == 124 else "ffmpeg failed",
             warnings=job.warnings,
         )
 

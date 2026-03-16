@@ -2,16 +2,17 @@ import os
 import stat
 from pathlib import Path
 
+
 def build_installer() -> None:
     """Generates the Deploy Video Tools.app in the root directory."""
     deploy_dir = Path(__file__).parent.absolute()
     output_app_path = deploy_dir / "Deploy Video Tools.app"
-    
+
     contents_dir = output_app_path / "Contents"
     macos_dir = contents_dir / "MacOS"
-    
+
     macos_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Simple plist that hides the dock icon entirely
     info_plist = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -58,13 +59,14 @@ else
     osascript -e "display dialog \\"Deployment Failed!\\n\\nCheck the log file at $LOG_FILE\\" buttons {\\"OK\\"} default button \\"OK\\" with title \\"Error\\" with icon stop"
 fi
 """
-    
+
     exec_path = macos_dir / "Deploy"
     exec_path.write_text(deploy_script)
-    
+
     # Make the wrapper executable
     os.chmod(exec_path, exec_path.stat().st_mode | stat.S_IEXEC)
     print(f"Successfully generated macOS double-click installer at: {output_app_path}")
+
 
 if __name__ == "__main__":
     build_installer()

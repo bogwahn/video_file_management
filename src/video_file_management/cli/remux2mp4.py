@@ -125,9 +125,7 @@ def _build_reencode_command(input_path: Path, output_path: Path, *, verbose: boo
     ]
 
 
-def _reencode_incompatible(
-    incompatible, *, dry_run: bool, verbose: bool, log_file: Optional[Path]
-) -> bool:
+def _reencode_incompatible(incompatible, *, dry_run: bool, verbose: bool, log_file: Optional[Path]) -> bool:
     runner = CommandRunner()
     had_failure = False
     for result in incompatible:

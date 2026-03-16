@@ -74,9 +74,77 @@ select = ["E", "F", "W", "C", "I"]
 ignore = ["E501"]  # Line too long (handled by formatter)
 
 [tool.bandit]
-tests = ["B201", "B301", "B302", "B303", "B304", "B305", "B306", "B307", "B308", "B309", "B310", "B311", "B312", "B313", "B314", "B315", "B316", "B317", "B318", "B319", "B320", "B321", "B322", "B323", "B324", "B325"]
-exclude_dirs = ["tests", "venv", ".venv"]
+tests = [
+    "B201",
+    "B301",
+    "B302",
+    "B303",
+    "B304",
+    "B305",
+    "B306",
+    "B307",
+    "B308",
+    "B310",
+    "B311",
+    "B312",
+    "B313",
+    "B314",
+    "B315",
+    "B316",
+    "B317",
+    "B318",
+    "B319",
+    "B321",
+    "B323",
+    "B324",
+]
+exclude_dirs = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    "build",
+    "dist",
+]
 
 [tool.coverage.run]
 branch = true
 source = ["src/video_file_management"]
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = ["E203", "W503", "E501"]
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "deploy",
+]
+
+[tool.pylint.main]
+py-version = "3.10"
+ignore-paths = [
+    '^\.venv/',
+    '^venv/',
+    '^build/',
+    '^dist/',
+]
+init-hook = "import sys; sys.path.append('src')"
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.messages_control]
+disable = [
+    "C",
+    "R",
+    "W",
+    "import-error",
+    "no-name-in-module",
+    "no-member",
+    "assignment-from-no-return",
+]
