@@ -1,55 +1,78 @@
 # video-file-management
 
-A clean, object-oriented Python library for video file management: metadata models, chapter/bookmark handling, and utility helpers.
+Minimal, stackable video utility commands: **chapterize** (chapter CRUD) and **remux** (lossless MP4 conversion). Installed globally via pipx.
+
+## Quick start
+
+### Installation
+
+```bash
+pipx install -e /path/to/video_file_management
+```
+
+Commands are then available globally:
+
+```bash
+chapterize --help
+remux --help
+```
+
+### Commands
+
+- **`chapterize`**: Add, edit, list, remove chapters in video files.
+  - Read chapters from text file, write to MP4 (via MP4Box), xattr, or ffmpeg metadata tracks.
+- **`remux`**: Lossless remux into MP4 container (ffmpeg stream copy, no re-encode).
+
+Both commands are stackable: process multiple files, integrate into workflows.
 
 ## Structure
 
 ```
-src/
-  video_file_management/
-    __init__.py            # package initialization (to be added as you build)
-    domain/                # core domain models (e.g., VideoFile, VideoMetadata)
-    marks/                 # chapters, bookmarks, protocols
-    utils/                 # parsing, timecode utilities, I/O helpers
-
-tests/                     # add tests as features are implemented
-quickactions/              # Finder Quick Action wrappers (bash)
-pyproject.toml             # build + tooling configuration
+src/video_file_management/
+  chapterize/             # Chapter CRUD: read/write chapters, handle formats
+    cli.py                # Entry point (argparse)
+    [service modules]     # Discovery, metadata I/O, writer backend selection
+  marks/                  # Shared chapter/mark models, readers, writers
+    models.py             # VideoMark, timecode formatting
+    readers.py, writers.py
+  remux/                  # MP4 remux (stream copy)
+    cli.py                # Entry point (argparse)
+    service.py            # ffmpeg invocation, file validation
+    remux_quickaction.py   # macOS Quick Action integration
+  [shared utilities]      # Timecode parsing, path helpers
 ```
 
-## Get started
+## Development
 
-- Create your core classes under `src/video_file_management/domain/` and feature modules under `marks/` and `utils/`.
-- Add `__init__.py` files to each package as you implement modules.
-- Optional: install locally in editable mode during development:
+Install in editable mode:
 
 ```bash
 pip install -e .
 ```
 
-## Commands
+Run tests:
 
-- `remux2mp4`: lossless remux into MP4 (ffmpeg stream copy).
-  - Installed via `pip install -e .` (console script).
-  - Local wrapper: `scripts/remux2mp4`.
-- `watchForBookmarks`: watch bookmarks directory, generate chapters, and embed them.
-  - Installed via `pip install -e .` (console script).
+```bash
+pytest
+```
 
-## Design notes
+Format & lint:
 
-- Favor small, cohesive classes with clear responsibilities.
-- Use protocols/ABCs to define extensible interfaces for marks (chapters/bookmarks) and storage backends.
-- Keep parsing/formatting logic in `utils/`; keep domain models pure and framework-agnostic.
+```bash
+black . && isort .
+mypy src
+```
 
-## Roadmap (suggested)
+## Design philosophy
 
-- `domain.VideoFile` and `domain.VideoMetadata`
-- `marks.ChaptersFile` and `marks.BookmarksFile` with read/write strategies
-- `utils.timecode` helpers and path/IO utilities
-- CLI wrappers and import/export adapters (MKV, MP4, CSV/JSON)
+- **Two commands, stable scope.** No roadmap for new features; changes are refactors or bug fixes within chapterize/remux.
+- **Plugin architecture (future).** When remux gains variants (MP4→MKV, MP4→WebM, etc.), refactor into plugin system; don't expand scope now.
+- **No in-repo fallbacks.** pipx-installed commands are the standard. Direct `python -m video_file_management.X.cli` works if needed but isn't documented.
 
-## macOS helpers
+## macOS Quick Actions
 
-- Finder Quick Action (context menu + hotkey) to **remux compatible files to MP4 without re-encoding**:
-  - `macos/RemuxToMP4-QuickAction.md`
-  - Quick Action wrapper: `quickactions/remux-to-mp4.sh`
+Finder context menu shortcuts (installed via Automator):
+- **Chapterize**: `quickactions/chapterize.sh`
+- **Remux**: `quickactions/remux.sh`
+
+To set up: Record in Automator → pass file path to the corresponding `.sh` script.
