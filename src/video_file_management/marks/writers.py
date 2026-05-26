@@ -6,6 +6,8 @@ import tempfile
 from pathlib import Path
 from typing import Any, MutableMapping, cast
 
+from ..chapter_reader import read_chapters
+from ..metadata_reader import read_file_metadata
 from ..utils.timecode import format_timecode
 from .protocols import VideoMarksFile
 
@@ -87,9 +89,11 @@ def _replace_original(temp_result: Path, src: Path) -> None:
 class MP4ChaptersWriter:
     """Embed chapters into MP4 using MP4Box (Nero iTunes-style chapters).
 
-    Steps:
-      1) Strip any existing chapters from input using ffmpeg (-map_chapters -1)
-      2) Convert marks to Nero format and import with MP4Box -chap
+    Behavior:
+        - Direct in-place writes (output_path is None) use MP4Box `-chap` against
+            the source file to avoid creating a full temporary video copy.
+        - Explicit output writes (output_path provided) preserve the older
+            ffmpeg-clean + MP4Box-new flow used by copy-to-new-file workflows.
     """
 
     def write(
@@ -100,10 +104,40 @@ class MP4ChaptersWriter:
     ) -> None:
         mp4box = shutil.which("MP4Box")
         if not mp4box:
-            return  # MP4Box not available
+            raise RuntimeError("MP4Box not available in PATH")
         src = Path(video_file_path)
         if not src.exists() or not src.is_file():
+            raise FileNotFoundError(video_file_path)
+
+        expected_count = len(tuple(chapters.marks()))
+        if expected_count == 0:
+            raise RuntimeError("No chapters to write")
+
+        # Fast path for chapterize CLI: mutate file in place without full copy.
+        if output_path is None:
+            with tempfile.TemporaryDirectory() as td:
+                td_path = Path(td)
+                nero_txt = td_path / "chapters.txt"
+                nero_txt.write_text(generate_nero_chapters_text(chapters), encoding="utf-8")
+                try:
+                    subprocess.run(
+                        [
+                            mp4box,
+                            "-chap",
+                            str(nero_txt),
+                            str(src),
+                        ],
+                        check=True,
+                        capture_output=True,
+                    )
+                except Exception as exc:
+                    raise RuntimeError(f"MP4Box in-place write failed: {exc}") from exc
+
+                verified, error = _verify_written_chapters(src, expected_count)
+                if not verified:
+                    raise RuntimeError(error or "Chapter verification failed")
             return
+
         with tempfile.TemporaryDirectory() as td:
             td_path = Path(td)
             cleaned = td_path / "clean.mp4"
@@ -155,11 +189,31 @@ class MP4ChaptersWriter:
                     check=True,
                     capture_output=True,
                 )
-            except Exception:
-                return
+            except Exception as exc:
+                raise RuntimeError(f"MP4Box output write failed: {exc}") from exc
 
             # 4) Place output at destination
-            if output_path:
-                shutil.copy2(str(out_path), output_path)
-            else:
-                _replace_original(out_path, src)
+            shutil.copy2(str(out_path), output_path)
+            verified, error = _verify_written_chapters(Path(output_path), expected_count)
+            if not verified:
+                raise RuntimeError(error or "Chapter verification failed")
+
+
+def _verify_written_chapters(path: Path, expected_count: int) -> tuple[bool, str | None]:
+    try:
+        if path.stat().st_size <= 1024:
+            return False, f"Output file is unexpectedly small ({path.stat().st_size} bytes)"
+    except OSError as exc:
+        return False, f"Unable to stat output file: {exc}"
+
+    meta = read_file_metadata(path)
+    has_video_stream = bool(meta.video.codec or meta.video.width or meta.video.height)
+    if not has_video_stream:
+        return False, "No video streams found after chapter write"
+
+    result = read_chapters(path)
+    if result.errors:
+        return False, "; ".join(result.errors)
+    if len(result.chapters) < expected_count:
+        return False, f"Expected {expected_count} chapters but found {len(result.chapters)}"
+    return True, None

@@ -1,0 +1,11 @@
+Two likely culprits, in order of probability:
+
+1. ffprobe subprocess on a network volume (read_file_metadata → _run_ffprobe)
+
+Every video file — regardless of whether you end up writing anything — triggers subprocess.run(ffprobe … -show_streams -show_format -show_chapters …). ffprobe must open the file and parse the container header. On Zetc (network/external mount), latency is highly variable per file. A 1080p file in a certain container (e.g. MKV-wrapped MP4) can take 5-10× longer than a clean MP4. There's also no timeout on the subprocess — if the volume stalls, it hangs indefinitely.
+
+2. Fuzzy-scan fallback in PathMatchIndex._pick_best_fuzzy
+
+If the chapter index has no exact normalized key for a video stem, the code iterates over every entry in the chapters dir and runs difflib.SequenceMatcher.ratio() on each pair. Those two filenames normalize to very long strings (alexiagoldpeternorthyoungchickslovelbigdicks-length). SequenceMatcher is O(n·m) per pair, and gets noticeably slower as the strings get longer. If 1-3 had exact chapter hits they skip this entirely; 4-5 apparently don't.
+
+Easy way to confirm which is dominant: add a temporary print(perf_counter()) before and after the find_marks_for_video_name call and the video_reader.read() call inside _process_one. That will isolate whether the time is in matching or in ffprobe.

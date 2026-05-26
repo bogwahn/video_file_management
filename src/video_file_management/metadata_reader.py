@@ -131,7 +131,13 @@ def _parse_chapters(data: dict) -> list[ChapterInfo]:
     """Extract chapter entries from ffprobe data."""
     chapters: list[ChapterInfo] = []
     for entry in data.get("chapters", []) or []:
-        start = float(entry.get("start", 0.0))
+        # ffprobe `start` may be timebase ticks for chapters; prefer `start_time`
+        # which is normalized to seconds.
+        start_raw = entry.get("start_time", entry.get("start", 0.0))
+        try:
+            start = float(start_raw)
+        except Exception:
+            start = 0.0
         title = ""
         if isinstance(entry, dict):
             raw_tags = entry.get("tags")

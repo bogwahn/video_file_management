@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from typing import Optional, Sequence
 
-from video_file_management.remux.remux2mp4 import (
+from video_file_management.remux.service import (
     VERSION,
     CommandRunner,
     Remux2Mp4Config,
@@ -22,7 +22,7 @@ REENCODE_AUDIO_BITRATE = "192k"
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="remux2mp4",
+        prog="remux",
         description="Losslessly re-container supported files into MP4 using ffmpeg.",
     )
     parser.add_argument(
@@ -176,7 +176,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     if args.version:
-        print(f"remux2mp4 version {VERSION}")
+        print(f"remux version {VERSION}")
         return 0
 
     config = Remux2Mp4Config(

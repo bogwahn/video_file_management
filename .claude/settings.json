@@ -1,5 +1,14 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(.venv/bin/python -m video_file_management.chapterize.cli --help)",
+      "Bash(.venv/bin/python -m video_file_management.remux.cli --help)",
+      "Bash(.venv/bin/python -m video_file_management.remux.cli --version)",
+      "Bash(PYTHONPATH=src .venv/bin/python -m video_file_management.chapterize.cli --help)",
+      "Bash(PYTHONPATH=src .venv/bin/python -m video_file_management.remux.cli --help)",
+      "Bash(PYTHONPATH=src .venv/bin/python -m video_file_management.remux.cli --version)",
+      "Bash(PYTHONPATH=src .venv/bin/python -m pytest --collect-only -q)"
+    ],
     "defaultMode": "bypassPermissions"
   }
 }

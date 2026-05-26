@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 from typing import Optional
 
-from video_file_management.remux.remux2mp4 import (
+from video_file_management.remux.service import (
     Remux2Mp4Config,
     Remux2Mp4Service,
     RemuxStatus,

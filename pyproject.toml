@@ -29,14 +29,8 @@ Homepage = "https://github.com/bogwahn/video_file_management"
 Issues = "https://github.com/bogwahn/video_file_management/issues"
 
 [project.scripts]
-remux2mp4 = "video_file_management.cli.remux2mp4:main"
-bookmark_chapterize = "video_file_management.bookmark_chapterize:main"
-watch_bookmarks = "video_file_management.bookmark_watch:main"
-bookmarks2chapters = "video_file_management.bookmark_watch:main"
-chapter_cleanup = "video_file_management.chapter_cleanup:main"
-chapterfilewalker = "video_file_management.chapter_file_walker:main"
 chapterize = "video_file_management.chapterize.cli:main"
-watchForBookmarks = "video_file_management.bookmark_watch:main"
+remux = "video_file_management.remux.cli:main"
 
 [tool.pytest.ini_options]
 minversion = "7.0"

@@ -1,6 +1,6 @@
 """Remuxing components."""
 
-from .remux2mp4 import (
+from .service import (
     VERSION,
     Remux2Mp4Config,
     Remux2Mp4Service,
