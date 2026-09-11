@@ -1,6 +1,6 @@
 # video-file-management
 
-Minimal, stackable video utility commands: **chapterize** (chapter CRUD) and **remux** (lossless MP4 conversion). Installed globally via pipx.
+Minimal, stackable video utility commands: **chapterize** (chapter CRUD), **remux** (lossless MP4 conversion), and the **Zephyr** download-core spike (`zephyr-watcher`). Installed globally via pipx.
 
 ## Quick start
 
@@ -22,8 +22,9 @@ remux --help
 - **`chapterize`**: Add, edit, list, remove chapters in video files.
   - Read chapters from text file, write to MP4 (via MP4Box), xattr, or ffmpeg metadata tracks.
 - **`remux`**: Lossless remux into MP4 container (ffmpeg stream copy, no re-encode).
+- **`zephyr-watcher`**: Spike FileWatcher — ensure hot folder, parse Zephyr filenames, route VR/Non-VR, upsert SQLite inventory. See `docs/zephyr/README.md`.
 
-Both commands are stackable: process multiple files, integrate into workflows.
+Commands are stackable: process multiple files, integrate into workflows.
 
 ## Structure
 

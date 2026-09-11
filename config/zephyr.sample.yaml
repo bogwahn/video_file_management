@@ -1,0 +1,32 @@
+# Zephyr download-core spike config
+# Paths: Internal dock SSD omits /Volumes; NAS Zetc/ZetcOld require /Volumes.
+# Point Video DownloadHelper at hot_folder. FileWatcher creates hot_folder if missing.
+
+hot_folder: /Internal/Zetc/Download
+
+dest:
+  # Real VR file lands under actors[0]; secondary actors get symlinks (see vr_secondary_link).
+  vr: /Volumes/Zetc/VR/{First.Actress}
+  # Flat Non-VR drop for this phase (not Studios/{Studio}; not a hot folder).
+  non_vr: /Volumes/ZetcOld/Uncategorized
+
+# Spike default for multi-actor VR secondary links.
+vr_secondary_link: symlink   # symlink | alias
+
+# Quarantine for non-conforming names (default under Internal, sibling of Download).
+quarantine_folder: /Internal/Zetc/Quarantine
+
+# Collision at destination: leave_in_hot | quarantine | overwrite
+collision_policy: leave_in_hot
+
+# Optional sidecar (same basename + .zephyr.json) preferred when present.
+sidecar: optional   # optional | required | never
+
+# Stable-file wait before processing (seconds).
+stable_seconds: 3
+
+# SQLite inventory path (created if missing).
+inventory_db: /Internal/Zetc/zephyr_inventory.sqlite3
+
+# Logging
+log_level: INFO
