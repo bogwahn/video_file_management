@@ -31,8 +31,9 @@ Copy `config/zephyr.sample.yaml` and override paths for local/dev (use temp dirs
 | `src/video_file_management/zephyr/inventory/` | `InventoryRepository` + SQLite |
 | `src/video_file_management/zephyr/watcher/` | Route VR/Non-VR, symlinks, daemon |
 | `src/video_file_management/zephyr/cli.py` | `zephyr-watcher` entrypoint |
-| `userscripts/zephyr-title-normalizer.user.js` | TamperMonkey `<title>` rewrite |
+| `userscripts/zephyr-title-normalizer.user.js` | TamperMonkey `<title>` rewrite (NS host selectors) |
 | `docs/zephyr/download-helper.md` | Point DH at hot folder |
+| `docs/zephyr/newsensations.md` | Install + verify notes for newsensations.com |
 
 ## Tests
 

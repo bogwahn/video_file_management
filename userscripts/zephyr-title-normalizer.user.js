@@ -1,20 +1,24 @@
 // ==UserScript==
 // @name         Zephyr Title Normalizer
 // @namespace    https://bogwahn.com/zephyr
-// @version      0.1.0
+// @version      0.2.0
 // @description  Rewrite document.title to Zephyr filename grammar for Video DownloadHelper.
-// @match        *://*/*
+// @match        *://newsensations.com/*
+// @match        *://www.newsensations.com/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // ==/UserScript==
 
 /**
- * Spike skeleton: extract page metadata → set document.title to locked grammar:
+ * Spike: extract page metadata → set document.title to locked grammar:
  *   {Actors}.{Studio}.{Title}.{Resolution}[.VR].{ext}
- * Reuses BANG! / Persepolis normalization patterns; retargeted from helper enqueue to title rewrite.
  *
- * Operator: point Video DownloadHelper at /Internal/Zetc/Download (see docs/zephyr/download-helper.md).
+ * Reuses Persepolis/BANG! normalize patterns (First.Last, .And., max 3 actors, dotted res).
+ * Per-host selector map below; NS selectors aligned to stash CommunityScrapers NewSensationsMain
+ * (+ NetworkSites fallbacks). See docs/zephyr/newsensations.md.
+ *
+ * Operator: point Video DownloadHelper at /Internal/Zetc/Download (docs/zephyr/download-helper.md).
  * TamperMonkey cannot mkdir the hot folder — FileWatcher ensures it exists.
  */
 
@@ -34,34 +38,98 @@
     perHost: {}
   };
 
-  // Seed BANG!-style host selectors (CSS; migrate from userscripts/BANG!Xpath.xpath as needed).
+  /**
+   * New Sensations tour scene page (tour_ns / updates).
+   * Primary XPath from stash NewSensationsMain.yml; CSS + alternate XPaths as fallbacks.
+   * Studio is fixed (site does not expose a reliable studio link on scene pages).
+   */
+  const NEWSENSATIONS_HOST = {
+    isVr: false,
+    studioFixed: 'New Sensations',
+    notes:
+      'tour_ns scene pages: div.indScene h1 + span.tour_update_models a. ' +
+      'Resolution often absent on tour HTML — inferred from download links or defaults to 4k.',
+    selectors: [
+      // Title (primary + layout variants across NS network tours)
+      { name: 'title', xpath: "//div[@class='indScene']/h1", attr: 'text' },
+      { name: 'title', xpath: "//div[@class='indScene']/h2", attr: 'text' },
+      { name: 'title', css: 'div.indScene h1', attr: 'text' },
+      { name: 'title', css: 'div.indScene h2', attr: 'text' },
+      { name: 'title', xpath: "//div[@class='update_title']", attr: 'text' },
+      { name: 'title', css: 'div.update_title', attr: 'text' },
+      { name: 'title', xpath: "//span[@class='title_bar_hilite']", attr: 'text' },
+
+      // Actors (max 3 applied later); multi
+      {
+        name: 'actors',
+        xpath: "//div[@class='sceneTextLink']/p/span[@class='tour_update_models']/a",
+        attr: 'text',
+        multi: true
+      },
+      {
+        name: 'actors',
+        xpath: "//span[@class='tour_update_models']/a",
+        attr: 'text',
+        multi: true
+      },
+      { name: 'actors', css: 'div.sceneTextLink span.tour_update_models a', attr: 'text', multi: true },
+      { name: 'actors', css: 'span.tour_update_models a', attr: 'text', multi: true },
+      { name: 'actors', xpath: "//span[@class='update_models']/a", attr: 'text', multi: true },
+      { name: 'actors', css: 'span.update_models a', attr: 'text', multi: true },
+
+      // Studio: fixed string (also applied via studioFixed if selectors miss)
+      { name: 'studio', fixed: 'New Sensations' },
+
+      // Resolution when a quality control exists (member / download UI — often missing on tour)
+      { name: 'resolution', css: '.download_quality .active, .quality-picker .on, .quality.active', attr: 'text' },
+      {
+        name: 'resolution',
+        xpath: "//a[contains(@href,'.mp4') or contains(@href,'.mkv')][contains(.,'4k') or contains(.,'4K') or contains(.,'1080') or contains(.,'720')]",
+        attr: 'text'
+      },
+      {
+        name: 'downloadUrl',
+        css: 'a[href*=".mp4"], a[href*=".mkv"], a[href*=".webm"]',
+        attr: 'href'
+      }
+    ]
+  };
+
+  // Per-host config map. Only newsensations.com is filled; other hosts = empty scaffolding.
   const DEFAULT_SITE_CONFIG = {
-    // Example placeholder — replace selectors per MVP host:
-    // 'www.example.com': {
-    //   isVr: false,
-    //   selectors: [
-    //     { name: 'actors', css: '.cast a', attr: 'text', multi: true },
-    //     { name: 'studio', css: '.studio a', attr: 'text' },
-    //     { name: 'title', css: 'h1', attr: 'text' },
-    //     { name: 'resolution', css: '.quality .active', attr: 'text' }
-    //   ]
-    // }
+    'newsensations.com': NEWSENSATIONS_HOST,
+    'www.newsensations.com': NEWSENSATIONS_HOST
+    // Future hosts (empty scaffolding — do not invent selectors yet):
+    // 'bang.com': { isVr: false, selectors: [] },
+    // 'www.bang.com': { isVr: false, selectors: [] },
   };
 
   function getFilenameConfig() {
-    return GM_getValue('filenameConfig', DEFAULT_FILENAME_CONFIG);
+    const saved = GM_getValue('filenameConfig', null);
+    if (!saved) return DEFAULT_FILENAME_CONFIG;
+    return {
+      global: Object.assign({}, DEFAULT_FILENAME_CONFIG.global, saved.global || {}),
+      perHost: Object.assign({}, DEFAULT_FILENAME_CONFIG.perHost, saved.perHost || {})
+    };
   }
   function setFilenameConfig(cfg) {
     GM_setValue('filenameConfig', cfg);
   }
   function getSiteConfig() {
-    return GM_getValue('siteConfig', DEFAULT_SITE_CONFIG);
+    const saved = GM_getValue('siteConfig', null);
+    if (!saved) return DEFAULT_SITE_CONFIG;
+    // Built-in hosts win unless the operator overwrote that host key.
+    return Object.assign({}, DEFAULT_SITE_CONFIG, saved);
   }
   function setSiteConfig(cfg) {
     GM_setValue('siteConfig', cfg);
   }
   function getSiteConfigForHost(host) {
-    return getSiteConfig()[host] || null;
+    const all = getSiteConfig();
+    if (all[host]) return all[host];
+    if (host.startsWith('www.') && all[host.slice(4)]) return all[host.slice(4)];
+    if (!host.startsWith('www.') && all['www.' + host]) return all['www.' + host];
+    return null;
   }
 
   function toTitleCaseWords(raw) {
@@ -86,8 +154,15 @@
   function buildActorBlock(actorNames) {
     if (!actorNames || !actorNames.length) return null;
     let norm = actorNames.map(normalizeActorName).filter(Boolean);
+    // Dedupe while preserving order (CSS+XPath fallbacks may double-hit)
+    const seen = Object.create(null);
+    norm = norm.filter((n) => {
+      if (seen[n]) return false;
+      seen[n] = true;
+      return true;
+    });
     if (norm.length > MAX_ACTORS) {
-      console.warn('Zephyr: truncating actors to', MAX_ACTORS);
+      console.warn('Zephyr: truncating actors to', MAX_ACTORS, norm);
       norm = norm.slice(0, MAX_ACTORS);
     }
     if (!norm.length) return null;
@@ -119,29 +194,74 @@
     return null;
   }
 
-  function detectVr(cfg, meta) {
+  function detectVr(cfg) {
     if (cfg && cfg.isVr === true) return true;
+    if (cfg && cfg.isVr === false) return false;
     const href = (window.location.href || '').toLowerCase();
     if (href.includes('/vr/')) return true;
-    const badges = cfg && Array.isArray(cfg.vrSignals) ? cfg.vrSignals : ['VR', '180°', 'SBS', 'MKX200'];
+    const badges = cfg && Array.isArray(cfg.vrSignals) ? cfg.vrSignals : ['180°', 'SBS', 'MKX200'];
     const bodyText = (document.body && document.body.innerText) || '';
     for (const b of badges) {
-      if (bodyText.indexOf(b) !== -1 && (b !== 'VR' || /\bVR\b/.test(bodyText))) {
-        // light heuristic; host isVr flag is preferred
-      }
+      if (bodyText.indexOf(b) !== -1) return true;
     }
-    if (cfg && cfg.isVr) return !!cfg.isVr;
+    if (/\bVR\b/.test(bodyText) && /virtual\s*reality/i.test(bodyText)) return true;
     return false;
   }
 
   function getNodeValue(node, attr) {
     if (!node) return null;
     if (attr === 'text') {
-      const t = (node.textContent || '').trim();
+      const t = (node.textContent || '').trim().replace(/\s+/g, ' ');
       return t || null;
     }
     const val = node.getAttribute(attr);
     return val ? val.trim() : null;
+  }
+
+  function evalXPathNodes(xpath) {
+    const out = [];
+    try {
+      const snap = document.evaluate(
+        xpath,
+        document,
+        null,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        null
+      );
+      for (let i = 0; i < snap.snapshotLength; i++) {
+        out.push(snap.snapshotItem(i));
+      }
+    } catch (e) {
+      console.warn('Zephyr: bad xpath', xpath, e);
+    }
+    return out;
+  }
+
+  function collectSelectorValues(sel) {
+    if (sel.fixed != null && String(sel.fixed).length) {
+      return [String(sel.fixed)];
+    }
+    const attr = sel.attr || 'text';
+    let nodes = [];
+    if (sel.xpath) nodes = evalXPathNodes(sel.xpath);
+    else if (sel.css) nodes = Array.from(document.querySelectorAll(sel.css));
+    return nodes.map((n) => getNodeValue(n, attr)).filter(Boolean);
+  }
+
+  function inferResolutionFromPage() {
+    const haystacks = [];
+    document.querySelectorAll('a[href], option, button, [data-quality], .download_quality, .quality').forEach((el) => {
+      haystacks.push(el.getAttribute('href') || '');
+      haystacks.push(el.textContent || '');
+      haystacks.push(el.getAttribute('data-quality') || '');
+    });
+    // Prefer higher resolutions when multiple appear
+    const order = ['4k', '2160', '2k', '1440', '1080', '720', '540', '480'];
+    const joined = haystacks.join(' ').toLowerCase();
+    for (const token of order) {
+      if (joined.includes(token)) return normalizeResolution(token);
+    }
+    return null;
   }
 
   function extractMetaForCurrentHost() {
@@ -164,23 +284,25 @@
     }
 
     for (const sel of cfg.selectors.slice(0, 20)) {
-      const { name, css, attr = 'text', multi = false } = sel;
-      if (!name || !css) continue;
-      if (multi) {
-        const values = Array.from(document.querySelectorAll(css))
-          .map((n) => getNodeValue(n, attr))
-          .filter(Boolean);
+      const { name, multi = false } = sel;
+      if (!name) continue;
+      const values = collectSelectorValues(sel);
+      if (!values.length) continue;
+
+      if (multi || name === 'actors') {
         if (name === 'actors') result.actors.push(...values);
-      } else {
-        const node = document.querySelector(css);
-        const value = getNodeValue(node, attr);
-        if (!value) continue;
-        if (name === 'actors') result.actors.push(value);
-        else if (name === 'studio' && !result.studio) result.studio = value;
-        else if (name === 'title' && !result.title) result.title = value;
-        else if (name === 'resolution' && !result.resolution) result.resolution = value;
-        else if ((name === 'downloadUrl' || name === 'url') && !result.url) result.url = value;
+        continue;
       }
+
+      const value = values[0];
+      if (name === 'studio' && !result.studio) result.studio = value;
+      else if (name === 'title' && !result.title) result.title = value;
+      else if (name === 'resolution' && !result.resolution) result.resolution = value;
+      else if ((name === 'downloadUrl' || name === 'url') && !result.url) result.url = value;
+    }
+
+    if (!result.studio && cfg.studioFixed) {
+      result.studio = cfg.studioFixed;
     }
 
     if (!result.url) {
@@ -192,12 +314,19 @@
         const path = new URL(result.url, window.location.href).pathname || '';
         const ext = path.split('.').pop();
         if (ext && ext.length <= 5) result.extension = ext.toLowerCase();
+        if (!result.resolution) {
+          result.resolution = normalizeResolution(result.url) || normalizeResolution(path);
+        }
       } catch (e) {
         /* ignore */
       }
     }
 
-    result.isVr = detectVr(cfg, result);
+    if (!result.resolution) {
+      result.resolution = inferResolutionFromPage();
+    }
+
+    result.isVr = detectVr(cfg);
     return result;
   }
 
@@ -224,7 +353,6 @@
     let base = filename;
     let ext = '';
     if (m) {
-      // Prefer truncating title: drop tokens before resolution
       base = m[1];
       ext = m[2];
     }
@@ -245,7 +373,10 @@
     const meta = extractMetaForCurrentHost();
     const name = buildZephyrFilename(meta);
     if (!name) {
-      console.warn('Zephyr: incomplete metadata; leaving document.title alone (or set NEEDS-META via menu).');
+      console.warn(
+        'Zephyr: incomplete metadata; leaving document.title alone.',
+        { actors: meta.actors, studio: meta.studio, title: meta.title }
+      );
       return null;
     }
     if (document.title !== name) {
@@ -299,7 +430,7 @@
   GM_registerMenuCommand('Zephyr: Edit site selectors (JSON for this host)', function () {
     const host = window.location.host;
     const all = getSiteConfig();
-    const current = all[host] || { isVr: false, selectors: [] };
+    const current = all[host] || getSiteConfigForHost(host) || { isVr: false, selectors: [] };
     const updated = window.prompt('Edit selector config for ' + host, JSON.stringify(current, null, 2));
     if (!updated) return;
     try {
@@ -337,6 +468,13 @@
     });
     const titleEl = document.querySelector('title');
     if (titleEl) obs.observe(titleEl, { childList: true, characterData: true, subtree: true });
+    // Late-hydrated tour markup (actors/title injected after first paint)
+    const bodyObs = new MutationObserver(function () {
+      scheduleApply();
+    });
+    if (document.body) {
+      bodyObs.observe(document.body, { childList: true, subtree: true });
+    }
     setInterval(resistOverwrite, 2000);
   }
 })();
