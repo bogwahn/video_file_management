@@ -16,8 +16,8 @@ FileWatcher creates this directory on startup if missing. TamperMonkey **cannot*
 1. Install / open **Video DownloadHelper** (browser extension).
 2. Set its download directory to **`/Internal/Zetc/Download`** (same as `hot_folder` in `config/zephyr.sample.yaml`).
 3. Prefer settings that use the **page title** as the suggested filename (do not let DH invent a different name).
-4. Install `userscripts/zephyr-title-normalizer.user.js` in TamperMonkey; configure per-host selectors; confirm `<title>` matches the grammar before starting a download.
-5. Run `zephyr-watcher` so files are routed out of the hot folder after download completes.
+4. Install `userscripts/zephyr-title-normalizer.user.js` (v0.3.0+) in TamperMonkey; confirm `<title>` uses compact studio (`NewSensations`) and omits resolution when unknown.
+5. Run `zephyr-watcher` so files are routed out of the hot folder after download completes (missing resolution may be enriched via ffprobe after move).
 
 ## Temp / partial names
 

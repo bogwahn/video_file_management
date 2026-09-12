@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zephyr Title Normalizer
 // @namespace    https://bogwahn.com/zephyr
-// @version      0.2.0
+// @version      0.3.0
 // @description  Rewrite document.title to Zephyr filename grammar for Video DownloadHelper.
 // @match        *://newsensations.com/*
 // @match        *://www.newsensations.com/*
@@ -12,11 +12,11 @@
 
 /**
  * Spike: extract page metadata → set document.title to locked grammar:
- *   {Actors}.{Studio}.{Title}.{Resolution}[.VR].{ext}
+ *   {Actors}.{Studio}.{Title}[.{Resolution}][.VR].{ext}
  *
- * Reuses Persepolis/BANG! normalize patterns (First.Last, .And., max 3 actors, dotted res).
- * Per-host selector map below; NS selectors aligned to stash CommunityScrapers NewSensationsMain
- * (+ NetworkSites fallbacks). See docs/zephyr/newsensations.md.
+ * Studio: compact (no whitespace, no internal dots) — "New Sensations" → NewSensations.
+ * Resolution: omit entirely when unknown at download/title time (do not default to 4k).
+ * Later enrichment: FileWatcher probes via in-repo metadata_reader/ffprobe.
  *
  * Operator: point Video DownloadHelper at /Internal/Zetc/Download (docs/zephyr/download-helper.md).
  * TamperMonkey cannot mkdir the hot folder — FileWatcher ensures it exists.
@@ -28,11 +28,11 @@
   const HARD_CAP = 150;
   const MAX_ACTORS = 3;
 
-  // Dotted resolution form (locked): ….Title.4k.mp4  (not Title4k)
+  // Resolution is optional: omit token when unresolved (locked 2026-09-12).
   const DEFAULT_FILENAME_CONFIG = {
     global: {
       mode: 'default',
-      template: '{actors}.{studio}.{title}.{resolution}{vr}.{ext}',
+      template: '{actors}.{studio}.{title}[.{resolution}]{vr}.{ext}',
       maxLength: 150
     },
     perHost: {}
@@ -48,7 +48,7 @@
     studioFixed: 'New Sensations',
     notes:
       'tour_ns scene pages: div.indScene h1 + span.tour_update_models a. ' +
-      'Resolution often absent on tour HTML — inferred from download links or defaults to 4k.',
+      'Resolution often absent on tour HTML — omit token; FileWatcher enriches via ffprobe.',
     selectors: [
       // Title (primary + layout variants across NS network tours)
       { name: 'title', xpath: "//div[@class='indScene']/h1", attr: 'text' },
@@ -171,9 +171,11 @@
 
   function normalizeStudio(raw) {
     if (!raw) return null;
-    const titled = toTitleCaseWords(stripIllegal(raw).trim().replace(/\s+/g, ' '));
-    // Prefer dotted words (locked plan) over space-stripped CamelCase.
-    return titled.replace(/\s+/g, '.');
+    // Compact studio token: no whitespace, no internal dots (locked 2026-09-12).
+    // "New Sensations" / "New.Sensations" → "NewSensations"
+    const cleaned = stripIllegal(raw).trim().replace(/[.\s]+/g, ' ');
+    const titled = toTitleCaseWords(cleaned);
+    return titled.replace(/\s+/g, '') || null;
   }
 
   function normalizeTitle(raw) {
@@ -334,7 +336,8 @@
     const actorBlock = buildActorBlock(meta.actors);
     const studioBlock = normalizeStudio(meta.studio);
     const titleBlock = normalizeTitle(meta.title);
-    const resToken = normalizeResolution(meta.resolution) || '4k';
+    // Omit resolution entirely when unknown — never default to 4k.
+    const resToken = normalizeResolution(meta.resolution);
     const ext = (meta.extension || 'mp4').toLowerCase().replace(/^\./, '');
 
     if (!actorBlock || !studioBlock || !titleBlock) {
@@ -342,7 +345,9 @@
     }
 
     const vr = meta.isVr ? '.VR' : '';
-    let name = [actorBlock, studioBlock, titleBlock, resToken].join('.') + vr + '.' + ext;
+    const parts = [actorBlock, studioBlock, titleBlock];
+    if (resToken) parts.push(resToken);
+    let name = parts.join('.') + vr + '.' + ext;
     name = name.replace(/\.+/g, '.');
     return enforceMaxLength(name, HARD_CAP);
   }
@@ -358,7 +363,7 @@
     }
     const parts = base.split('.');
     while ((parts.join('.') + ext).length > maxLen && parts.length > 4) {
-      // drop from title region (near end, before resolution)
+      // drop from title region (near end, before optional resolution)
       parts.splice(parts.length - 2, 1);
     }
     let out = parts.join('.') + ext;
@@ -416,10 +421,12 @@
         JSON.stringify(meta.actors) +
         '\nStudio: ' +
         meta.studio +
+        ' → ' +
+        (normalizeStudio(meta.studio) || '(none)') +
         '\nTitle: ' +
         meta.title +
         '\nRes: ' +
-        meta.resolution +
+        (normalizeResolution(meta.resolution) || '(omit — enrich later)') +
         '\nVR: ' +
         meta.isVr +
         '\nPage: ' +

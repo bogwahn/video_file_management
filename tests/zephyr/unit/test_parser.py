@@ -5,9 +5,17 @@ import pytest
 from video_file_management.zephyr.parser import (
     ParseError,
     build_filename,
+    normalize_studio,
     parse_filename,
+    resolution_from_dimensions,
     try_parse_filename,
 )
+
+
+def test_normalize_studio_compact_no_dots():
+    assert normalize_studio("New Sensations") == "NewSensations"
+    assert normalize_studio("New.Sensations") == "NewSensations"
+    assert normalize_studio("Blacked Raw") == "BlackedRaw"
 
 
 def test_parse_non_vr_multi_actor():
@@ -41,6 +49,29 @@ def test_parse_vr_three_actors():
     assert p.is_vr is True
 
 
+def test_parse_newsensations_with_resolution():
+    name = (
+        "Paris.White.NewSensations.Babysitter.Paris.White."
+        "Is.On.The.Naughty.Slut.List.4k.mp4"
+    )
+    p = parse_filename(name)
+    assert p.studio == "NewSensations"
+    assert p.resolution == "4k"
+    assert p.actors == ("Paris.White",)
+
+
+def test_parse_newsensations_without_resolution():
+    name = (
+        "Paris.White.NewSensations.Babysitter.Paris.White."
+        "Is.On.The.Naughty.Slut.List.mp4"
+    )
+    p = parse_filename(name)
+    assert p.studio == "NewSensations"
+    assert p.resolution is None
+    assert p.title == "Babysitter.Paris.White.Is.On.The.Naughty.Slut.List"
+    assert p.is_vr is False
+
+
 def test_build_roundtrip_dotted_resolution():
     name = build_filename(
         actors=["Jane Doe", "John Smith"],
@@ -56,6 +87,35 @@ def test_build_roundtrip_dotted_resolution():
     assert parse_filename(name).actors == ("Jane.Doe", "John.Smith")
 
 
+def test_build_omits_unknown_resolution():
+    name = build_filename(
+        actors=["Paris White"],
+        studio="New Sensations",
+        title="Babysitter Paris White Is On The Naughty Slut List",
+        resolution=None,
+        extension="mp4",
+    )
+    assert name == (
+        "Paris.White.NewSensations.Babysitter.Paris.White."
+        "Is.On.The.Naughty.Slut.List.mp4"
+    )
+    assert ".4k." not in name
+    assert ".NewSensations." in name
+    p = parse_filename(name)
+    assert p.resolution is None
+    assert p.studio == "NewSensations"
+
+
+def test_build_newsensations_with_resolution():
+    name = build_filename(
+        actors=["Paris White"],
+        studio="New Sensations",
+        title="Scene Title",
+        resolution="1080p",
+    )
+    assert name == "Paris.White.NewSensations.Scene.Title.1080p.mp4"
+
+
 def test_build_vr_marker_before_ext():
     name = build_filename(
         actors=["Jane.Doe"],
@@ -66,6 +126,20 @@ def test_build_vr_marker_before_ext():
     )
     assert name.endswith(".1080p.VR.mp4")
     assert parse_filename(name).is_vr is True
+
+
+def test_build_vr_without_resolution():
+    name = build_filename(
+        actors=["Jane.Doe"],
+        studio="VirtualReal",
+        title="Scene.Title",
+        resolution=None,
+        is_vr=True,
+    )
+    assert name == "Jane.Doe.VirtualReal.Scene.Title.VR.mp4"
+    p = parse_filename(name)
+    assert p.resolution is None
+    assert p.is_vr is True
 
 
 def test_build_truncates_to_max_three_actors():
@@ -84,9 +158,11 @@ def test_reject_whitespace():
         parse_filename("Jane Doe.Studio.Title.4k.mp4")
 
 
-def test_reject_missing_resolution():
-    with pytest.raises(ParseError):
-        parse_filename("Jane.Doe.Studio.Title.mp4")
+def test_accept_missing_resolution():
+    p = parse_filename("Jane.Doe.Studio.Title.mp4")
+    assert p.resolution is None
+    assert p.studio == "Studio"
+    assert p.title == "Title"
 
 
 def test_reject_garbage():
@@ -106,3 +182,11 @@ def test_build_truncates_title_for_length():
     )
     assert len(name) <= 150
     parse_filename(name)  # still valid
+
+
+def test_resolution_from_dimensions():
+    assert resolution_from_dimensions(3840, 2160) == "4k"
+    assert resolution_from_dimensions(1920, 1080) == "1080p"
+    assert resolution_from_dimensions(1280, 720) == "720p"
+    assert resolution_from_dimensions(None, None) is None
+    assert resolution_from_dimensions(320, 240) is None

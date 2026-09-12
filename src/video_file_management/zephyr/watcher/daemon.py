@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Callable
 
 from video_file_management.zephyr.config import ZephyrConfig, assert_no_hot_dest_loop
+from video_file_management.zephyr.enrich import apply_resolution_enrichment
 from video_file_management.zephyr.inventory.models import InventoryRecord
 from video_file_management.zephyr.inventory.repository import InventoryRepository
 from video_file_management.zephyr.parser import ParseError, parse_filename
@@ -108,14 +109,27 @@ def process_file(
     if result.quarantined:
         return None
 
+    # After move: if download title omitted resolution, probe via in-repo ffprobe helpers
+    # (metadata_reader.read_file_metadata) and rename when a token can be resolved.
+    real_path, parsed, symlink_paths = apply_resolution_enrichment(
+        result.real_path,
+        parsed,
+        symlink_paths=result.symlink_paths,
+    )
+    metadata["resolution"] = parsed.resolution
+    metadata["actors"] = list(parsed.actors)
+    metadata["studio"] = parsed.studio
+    if any(w.startswith("enriched resolution=") for w in parsed.warnings):
+        metadata["resolution_enriched"] = True
+
     record = InventoryRecord(
-        full_path=str(result.real_path.resolve()),
-        filename=result.real_path.name,
+        full_path=str(real_path.resolve()),
+        filename=real_path.name,
         source_url=source_url,
         metadata=metadata,
     )
-    if result.symlink_paths:
-        record.metadata["secondary_links"] = [str(p) for p in result.symlink_paths]
+    if symlink_paths:
+        record.metadata["secondary_links"] = [str(p) for p in symlink_paths]
 
     return repo.upsert(record)
 

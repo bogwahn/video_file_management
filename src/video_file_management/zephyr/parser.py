@@ -1,12 +1,13 @@
 """Filename grammar parser/builder for Zephyr download core.
 
 Grammar (locked):
-  {Actors}.{Studio}.{Title}.{Resolution}[.VR].{ext}
+  {Actors}.{Studio}.{Title}[.{Resolution}][.VR].{ext}
 
 Actors: First.Last, joined with .And., max 3.
-Resolution: dotted token (480p|540p|720p|1080p|2k|4k).
+Studio: compact token — no whitespace, no internal dots (e.g. NewSensations).
+Resolution: optional dotted token (480p|540p|720p|1080p|2k|4k). Omit entirely when unknown.
 VR marker: literal .VR immediately before extension when is_vr.
-No whitespace; Title.Case words separated by dots.
+No whitespace; Title.Case words separated by dots (except studio compact form).
 """
 
 from __future__ import annotations
@@ -34,7 +35,7 @@ class ParsedFilename:
     actors: tuple[str, ...]
     studio: str
     title: str
-    resolution: str
+    resolution: str | None
     is_vr: bool
     extension: str
     filename: str
@@ -64,8 +65,20 @@ def normalize_actor(raw: str) -> str:
 
 
 def normalize_studio(raw: str) -> str:
-    """Normalize studio to Capitalized.dotted words (no whitespace)."""
-    return _normalize_token_words(raw, join=".")
+    """Normalize studio to a compact token: no whitespace, no internal dots.
+
+    Examples: "New Sensations" / "New.Sensations" → "NewSensations".
+    Already-compact CamelCase tokens (e.g. NewSensations) are preserved.
+    """
+    cleaned = ILLEGAL_CHARS.sub("", raw.strip())
+    if not cleaned:
+        return ""
+    # Single compact token already — preserve internal capitals.
+    if not re.search(r"[\s.]", cleaned):
+        if cleaned[0].islower():
+            return cleaned[0].upper() + cleaned[1:]
+        return cleaned
+    return _normalize_token_words(cleaned, join="")
 
 
 def normalize_title(raw: str) -> str:
@@ -82,17 +95,45 @@ def normalize_resolution(raw: str | None) -> str | None:
     return None
 
 
+def resolution_from_dimensions(width: int | None, height: int | None) -> str | None:
+    """Map probed pixel dimensions to a Zephyr resolution token, or None if unknown."""
+    if width is None and height is None:
+        return None
+    # Use the smaller axis so portrait / VR SBS frames still map sensibly.
+    dims = [d for d in (width, height) if d is not None and d > 0]
+    if not dims:
+        return None
+    short = min(dims)
+    if short >= 2160:
+        return "4k"
+    if short >= 1440:
+        return "2k"
+    if short >= 1080:
+        return "1080p"
+    if short >= 720:
+        return "720p"
+    if short >= 540:
+        return "540p"
+    if short >= 480:
+        return "480p"
+    return None
+
+
 def build_filename(
     *,
     actors: list[str] | tuple[str, ...],
     studio: str,
     title: str,
-    resolution: str,
+    resolution: str | None = None,
     extension: str = "mp4",
     is_vr: bool = False,
     max_length: int = MAX_FILENAME_LEN,
 ) -> str:
-    """Build a conforming filename; truncates title first if over max_length."""
+    """Build a conforming filename; truncates title first if over max_length.
+
+    When ``resolution`` is missing/unresolved, the resolution token is omitted
+    entirely (no default such as ``4k``).
+    """
     norm_actors = [normalize_actor(a) for a in actors if a and str(a).strip()]
     if len(norm_actors) > MAX_ACTORS:
         norm_actors = norm_actors[:MAX_ACTORS]
@@ -105,17 +146,20 @@ def build_filename(
         raise ParseError("studio is required")
     if not title_n:
         raise ParseError("title is required")
-    if not res or res not in RESOLUTIONS:
-        raise ParseError(f"resolution must be one of {sorted(RESOLUTIONS)}")
+    if resolution is not None and str(resolution).strip() and not res:
+        raise ParseError(f"resolution must be one of {sorted(RESOLUTIONS)} or omitted")
+    if res is not None and res not in RESOLUTIONS:
+        raise ParseError(f"resolution must be one of {sorted(RESOLUTIONS)} or omitted")
     ext = extension.lower().lstrip(".")
     if not ext:
         raise ParseError("extension is required")
 
     actor_block = ".And.".join(norm_actors)
     vr_part = ".VR" if is_vr else ""
+    res_part = f".{res}" if res else ""
     # Assemble; shrink title if needed
     while True:
-        name = f"{actor_block}.{studio_n}.{title_n}.{res}{vr_part}.{ext}"
+        name = f"{actor_block}.{studio_n}.{title_n}{res_part}{vr_part}.{ext}"
         if len(name) <= max_length:
             return name
         parts = title_n.split(".")
@@ -180,9 +224,8 @@ def parse_filename(name: str | Path) -> ParsedFilename:
         raise ParseError("filename contains illegal filesystem characters")
 
     parts = filename.split(".")
+    # Minimum without resolution: First.Last.Studio.Title.ext → 5 segments
     if len(parts) < 5:
-        # minimum: First.Last.Studio.Title.Res.ext  → 6 tokens; or First.Last.S.T.4k.mp4
-        # First.Last + studio(1) + title(1) + res + ext = 6
         raise ParseError("filename has too few dotted segments")
 
     ext = parts[-1].lower()
@@ -196,21 +239,24 @@ def parse_filename(name: str | Path) -> ParsedFilename:
         body = body[:-1]
 
     if not body:
-        raise ParseError("missing resolution token")
-    resolution = body[-1].lower()
-    if resolution not in RESOLUTIONS:
-        raise ParseError(f"missing or invalid resolution token before extension: {resolution!r}")
-    body = body[:-1]
+        raise ParseError("missing body tokens before extension")
+
+    resolution: str | None = None
+    if body[-1].lower() in RESOLUTIONS:
+        resolution = body[-1].lower()
+        body = body[:-1]
+
+    if not body:
+        raise ParseError("missing studio/title tokens")
 
     actors, rest, warnings = _parse_actors_from_left(body)
     if len(rest) < 2:
         raise ParseError("expected studio and title tokens after actors")
 
-    # Heuristic: first remaining token(s) until we have ≥1 title token.
-    # Prefer single-token studio when rest has ≥2 tokens; if multi-word studio
-    # was dotted (Blacked.Raw), we cannot perfectly split — spike default:
-    # studio = first token, title = remaining tokens joined.
+    # Studio is a single compact token (no internal dots). Title = remaining tokens.
     studio = rest[0]
+    if "." in studio:
+        warnings.append("studio token unexpectedly contains dots")
     title_tokens = rest[1:]
     if not title_tokens:
         raise ParseError("title is required")
