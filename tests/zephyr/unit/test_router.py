@@ -14,16 +14,15 @@ from video_file_management.zephyr.watcher.router import route_file
 def _cfg(tmp_path: Path):
     hot = tmp_path / "Download"
     vr = tmp_path / "VR" / "{First.Actress}"
-    non_vr = tmp_path / "Uncategorized"
+    non_vr = tmp_path / "Studios" / "{Studio}"
     quarantine = tmp_path / "Quarantine"
     db = tmp_path / "inv.sqlite3"
     hot.mkdir()
-    non_vr.mkdir()
     quarantine.mkdir()
     return load_config(
         data={
             "hot_folder": str(hot),
-            "dest": {"vr": str(vr), "non_vr": str(non_vr)},
+            "dest_folder": {"vr": str(vr), "non_vr": str(non_vr)},
             "quarantine_folder": str(quarantine),
             "inventory_db": str(db),
             "stable_seconds": 0.2,
@@ -40,10 +39,23 @@ def test_route_non_vr(tmp_path: Path) -> None:
     src.write_bytes(b"video-bytes")
     parsed = parse_filename(name)
     result = route_file(cfg, src, parsed)
+    expected = tmp_path / "Studios" / "Bang" / name
     assert not result.quarantined
-    assert result.real_path == cfg.dest_non_vr / name
+    assert result.real_path == expected
+    assert result.real_path == cfg.resolve_non_vr_dest("Bang") / name
     assert result.real_path.is_file()
     assert not src.exists()
+
+
+def test_route_non_vr_compact_studio(tmp_path: Path) -> None:
+    cfg = _cfg(tmp_path)
+    name = "Paris.White.NewSensations.Babysitter.Scene.Title.4k.mp4"
+    src = cfg.hot_folder / name
+    src.write_bytes(b"ns")
+    result = route_file(cfg, src, parse_filename(name))
+    expected = tmp_path / "Studios" / "NewSensations" / name
+    assert result.real_path == expected
+    assert expected.is_file()
 
 
 def test_route_vr_single(tmp_path: Path) -> None:
@@ -93,7 +105,7 @@ def test_scan_upserts_inventory(tmp_path: Path) -> None:
     (cfg.hot_folder / name).write_bytes(b"data")
     records = scan_hot_folder(cfg, repo)
     assert len(records) == 1
-    assert records[0].full_path.endswith(name)
+    assert records[0].full_path.endswith(f"Studios/Bang/{name}")
     assert repo.get_by_path(records[0].full_path) is not None
     repo.close()
 
@@ -101,7 +113,8 @@ def test_scan_upserts_inventory(tmp_path: Path) -> None:
 def test_collision_leave_in_hot(tmp_path: Path) -> None:
     cfg = _cfg(tmp_path)
     name = "Jane.Doe.Bang.Scene.Title.4k.mp4"
-    dest = cfg.dest_non_vr / name
+    dest = cfg.resolve_non_vr_dest("Bang") / name
+    dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(b"existing")
     src = cfg.hot_folder / name
     src.write_bytes(b"new")

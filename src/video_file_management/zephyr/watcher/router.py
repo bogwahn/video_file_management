@@ -133,7 +133,12 @@ def route_file(
             links.append(create_secondary_link(cfg, real, link_path))
         return RouteResult(real, tuple(links), False, False, "routed VR")
 
-    dest = cfg.dest_non_vr / filename
+    if not parsed.studio:
+        q = quarantine_file(cfg, src, "Non-VR file missing studio")
+        return RouteResult(q, (), True, False, "Non-VR missing studio")
+
+    dest_dir = cfg.resolve_non_vr_dest(parsed.studio)
+    dest = dest_dir / filename
     collision = _handle_collision(cfg, src, dest)
     if collision == "skip":
         return RouteResult(src, (), False, True, f"collision at {dest}")

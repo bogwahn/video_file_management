@@ -10,9 +10,9 @@ import yaml
 
 DEFAULTS: dict[str, Any] = {
     "hot_folder": "/Internal/Zetc/Download",
-    "dest": {
+    "dest_folder": {
         "vr": "/Volumes/Zetc/VR/{First.Actress}",
-        "non_vr": "/Volumes/ZetcOld/Uncategorized",
+        "non_vr": "/Volumes/ZetcOld/Studios/{Studio}",
     },
     "vr_secondary_link": "symlink",
     "quarantine_folder": "/Internal/Zetc/Quarantine",
@@ -27,8 +27,8 @@ DEFAULTS: dict[str, Any] = {
 @dataclass(frozen=True)
 class ZephyrConfig:
     hot_folder: Path
-    dest_vr_template: str
-    dest_non_vr: Path
+    dest_folder_vr_template: str
+    dest_folder_non_vr_template: str
     vr_secondary_link: str
     quarantine_folder: Path
     collision_policy: str
@@ -43,9 +43,24 @@ class ZephyrConfig:
         if not folder:
             raise ValueError("first_actress is required for VR destination")
         path = (
-            self.dest_vr_template.replace("{First.Actress}", folder)
+            self.dest_folder_vr_template.replace("{First.Actress}", folder)
             .replace("{first_actress}", folder)
             .replace("{actors[0]}", folder)
+        )
+        return Path(path)
+
+    def resolve_non_vr_dest(self, studio: str) -> Path:
+        """Replace {Studio} with the compact studio token from the filename grammar.
+
+        Folder spelling matches the filename studio token (e.g. NewSensations),
+        not spaced display form or dotted New.Sensations.
+        """
+        folder = studio.strip()
+        if not folder:
+            raise ValueError("studio is required for Non-VR destination")
+        path = (
+            self.dest_folder_non_vr_template.replace("{Studio}", folder)
+            .replace("{studio}", folder)
         )
         return Path(path)
 
@@ -60,20 +75,44 @@ def _deep_merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[st
     return out
 
 
+def _dest_folder_mapping(
+    merged: Mapping[str, Any],
+    *,
+    overrides: list[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Prefer dest_folder from the latest override; accept legacy dest:; else defaults."""
+    raw: Any = None
+    for override in reversed(overrides):
+        if "dest_folder" in override:
+            raw = override["dest_folder"]
+            break
+        if "dest" in override:
+            raw = override["dest"]
+            break
+    if raw is None:
+        raw = merged.get("dest_folder") or DEFAULTS["dest_folder"]
+    if not isinstance(raw, dict):
+        raise ValueError("dest_folder must be a mapping with vr and non_vr")
+    # Merge with defaults so partial overrides (e.g. only non_vr) still get vr.
+    return _deep_merge(DEFAULTS["dest_folder"], raw)
+
+
 def load_config(path: Path | str | None = None, *, data: Mapping[str, Any] | None = None) -> ZephyrConfig:
     """Load config from YAML path and/or explicit dict; missing keys use spike defaults."""
     merged: dict[str, Any] = dict(DEFAULTS)
+    overrides: list[Mapping[str, Any]] = []
     if path is not None:
         raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
         if not isinstance(raw, dict):
             raise ValueError(f"Config root must be a mapping: {path}")
+        overrides.append(raw)
         merged = _deep_merge(merged, raw)
     if data is not None:
+        overrides.append(data)
         merged = _deep_merge(merged, data)
 
-    dest = merged.get("dest") or {}
-    if not isinstance(dest, dict):
-        raise ValueError("dest must be a mapping with vr and non_vr")
+    dest = _dest_folder_mapping(merged, overrides=overrides)
+    defaults_dest = DEFAULTS["dest_folder"]
 
     vr_link = str(merged.get("vr_secondary_link", "symlink")).lower()
     if vr_link not in {"symlink", "alias"}:
@@ -89,8 +128,8 @@ def load_config(path: Path | str | None = None, *, data: Mapping[str, Any] | Non
 
     return ZephyrConfig(
         hot_folder=Path(str(merged["hot_folder"])),
-        dest_vr_template=str(dest.get("vr", DEFAULTS["dest"]["vr"])),
-        dest_non_vr=Path(str(dest.get("non_vr", DEFAULTS["dest"]["non_vr"]))),
+        dest_folder_vr_template=str(dest.get("vr", defaults_dest["vr"])),
+        dest_folder_non_vr_template=str(dest.get("non_vr", defaults_dest["non_vr"])),
         vr_secondary_link=vr_link,
         quarantine_folder=Path(str(merged["quarantine_folder"])),
         collision_policy=collision,
@@ -104,13 +143,15 @@ def load_config(path: Path | str | None = None, *, data: Mapping[str, Any] | Non
 def assert_no_hot_dest_loop(cfg: ZephyrConfig) -> None:
     """Fail loudly if hot_folder coincides with a destination root (no hot≡dest loops)."""
     hot = cfg.hot_folder.resolve()
-    non_vr = cfg.dest_non_vr.resolve()
-    if hot == non_vr:
-        raise ValueError(f"hot_folder must not equal dest.non_vr: {hot}")
-    # VR template without placeholder should also not equal hot
-    vr_root = Path(cfg.dest_vr_template.split("{")[0].rstrip("/"))
+    non_vr_root = Path(cfg.dest_folder_non_vr_template.split("{")[0].rstrip("/"))
+    try:
+        if non_vr_root.resolve() == hot:
+            raise ValueError(f"hot_folder must not equal dest_folder.non_vr root: {hot}")
+    except OSError:
+        pass
+    vr_root = Path(cfg.dest_folder_vr_template.split("{")[0].rstrip("/"))
     try:
         if vr_root.resolve() == hot:
-            raise ValueError(f"hot_folder must not equal dest.vr root: {hot}")
+            raise ValueError(f"hot_folder must not equal dest_folder.vr root: {hot}")
     except OSError:
         pass

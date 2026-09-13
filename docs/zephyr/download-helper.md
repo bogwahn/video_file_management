@@ -2,12 +2,15 @@
 
 Zephyr does **not** build or ship Video DownloadHelper. The spike only requires the operator to point DH at the locked hot folder so TamperMonkey’s rewritten `<title>` becomes the download filename.
 
-## Hot folder (locked)
+## Paths (locked)
 
-| Role | Path |
-|------|------|
-| Hot folder (inbox) | `/Internal/Zetc/Download` |
-| Path rule | Internal dock SSD — **no** `/Volumes` prefix |
+| Config key | Role | Path |
+|------------|------|------|
+| `hot_folder` | Initial download inbox | `/Internal/Zetc/Download` |
+| `dest_folder.vr` | Final VR destination | `/Volumes/Zetc/VR/{First.Actress}` |
+| `dest_folder.non_vr` | Final Non-VR destination | `/Volumes/ZetcOld/Studios/{Studio}` |
+
+`hot_folder` path rule: Internal dock SSD — **no** `/Volumes` prefix. NAS dests keep `/Volumes`. Non-VR `{Studio}` = compact filename token (e.g. `NewSensations`).
 
 FileWatcher creates this directory on startup if missing. TamperMonkey **cannot** `mkdir` on the host filesystem.
 

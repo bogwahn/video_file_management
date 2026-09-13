@@ -13,7 +13,7 @@ from video_file_management.zephyr.inventory import (
 def test_upsert_and_get(tmp_path: Path) -> None:
     repo = SqliteInventoryRepository(tmp_path / "inv.sqlite3")
     rec = InventoryRecord(
-        full_path="/Volumes/ZetcOld/Uncategorized/Jane.Doe.Studio.Title.4k.mp4",
+        full_path="/Volumes/ZetcOld/Studios/Studio/Jane.Doe.Studio.Title.4k.mp4",
         filename="Jane.Doe.Studio.Title.4k.mp4",
         source_url="https://example.com/scene",
         metadata={"tags": ["new"]},
