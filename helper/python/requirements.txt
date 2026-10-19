@@ -1,8 +1,0 @@
-# Editable install of the project
--e ../..
-
-# Dev/test tools
-pytest
-black
-isort
-mypy

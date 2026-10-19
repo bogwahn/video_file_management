@@ -6,13 +6,6 @@
 		}
 	],
 	"settings": {
-		"vscode-as-git-mergetool.settingsAssistantOnStartup": false,
-		"chat.tools.terminal.autoApprove": {
-			"./quickactions/chapterize-video.sh": true,
-			"/^zsh \\./quickactions/chapterize-video\\.sh --help; echo EXIT:\\$\\?; tail -n 40 \"\\$HOME/Library/Logs/video_file_management/chapterize-video\\.log\"$/": {
-				"approve": true,
-				"matchCommandLine": true
-			}
-		}
+		"vscode-as-git-mergetool.settingsAssistantOnStartup": false
 	}
 }

@@ -1,0 +1,822 @@
+<section id="mainplayer" class="ex-module centerwrap">
+  <div class="ex-grid" data-items="3" data-items-xl="3" data-items-lg="3" data-items-md="3" data-items-sm="1" data-items-xs="1" data-gap="10" style="--cols: 3; --gap: 10px;">
+    <!-- LEFT COLUMN -->
+    <div class="ex-grid-item">
+      <div class="ex-grid" data-items="1" data-items-xl="1" data-items-lg="1" data-items-md="1" data-items-sm="1" data-items-xs="1" data-gap="10" style="--cols: 1; --gap: 10px;">
+        <div class="ex-grid-item">
+          <h4>Leah Gotti - Cute Little Things #3</h4>
+        </div>
+        <div class="ex-grid-item">
+            Starring:
+          <a href="sets.php?id=2696">Leah Gotti</a>
+          <a href="sets.php?id=1375">Ramon Nomar</a>
+      </div>
+      <div class="ex-grid-item ex-rating-row">
+        <span class="ex-rating-label">Average Rating:</span>
+        <span class="ex-rating-badge" style="--rt: 0.75;">
+          4.0  </span>
+      </div>
+      <div class="ex-grid-item">
+        <span>Series: </span> <a href="category.php?id=885">Cute Little Things</a> 
+      </div>
+      <!-- Full scene button -->
+      <div class="ex-grid-item">
+        <button type="button" class="ex-btn ex-btn-trailer ex-btn-fullscene" data-ex-watch-fullscene="">
+          WATCH FULL SCENE
+        </button>
+      </div>
+      <!-- Actions row (always present so layout doesn't break) -->
+      <div class="ex-grid-item ex-actions-row">
+        <!-- Favorites icon -->
+        <button type="button" class="ex-favicon" data-set-id="6407" data-fav="0" aria-pressed="false" aria-label="Add to favorites">
+          <span class="ex-favicon__icon" aria-hidden="true"></span>
+          <span class="ex-fav-tooltip" aria-hidden="true"></span>
+        </button>
+      <div class="ex-ratingbox" data-type="set" data-id="6407" data-voted="0" data-votelock="0" aria-label="Rate this scene">
+        <button type="button" class="ex-ratebtn ex-ratebtn--up" data-vote="10" aria-label="Thumbs up">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M14 9V19a2 2 0 0 1-2 2H6.6a2 2 0 0 1-2-2.4l1.1-6.6a2 2 0 0 1 2-1.6H10l-.6-4.2A2 2 0 0 1 11.4 4h.6l2 3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+            <path d="M18 9v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+          <span class="ex-icon-tooltip" aria-hidden="true">Thumbs Up</span>
+        </button>
+        <button type="button" class="ex-ratebtn ex-ratebtn--down" data-vote="2" aria-label="Thumbs down">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10 15V5a2 2 0 0 1 2-2h5.4a2 2 0 0 1 2 2.4l-1.1 6.6a2 2 0 0 1-2 1.6H14l.6 4.2a2 2 0 0 1-2 2.2h-.6l-2-3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+            <path d="M6 15V5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+          <span class="ex-icon-tooltip" aria-hidden="true">Thumbs Down</span>
+        </button>
+      </div>
+    <button type="button" class="ex-iconbtn ex-iconbtn--photos" data-ex-open-gallery="" data-ex-open="mainphotogallery" data-ex-close="mainplayer" aria-label="View photo gallery">
+      <svg class="ex-icon ex-icon-camera" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 6h-3l-1.2-2H8.2L7 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+        <circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="2"></circle>
+      </svg>
+      <span class="ex-icon-tooltip" aria-hidden="true">Photos</span>
+    </button>
+    <button type="button" class="ex-iconbtn ex-iconbtn--download" data-ex-download-menu="" data-ex-player="#mainplayer .ex-player" aria-label="Download video">
+      <svg class="ex-icon ex-icon-download" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        <path d="M8 11l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+      </svg>
+      <span class="ex-icon-tooltip" aria-hidden="true">Download</span>
+    </button>
+    <button type="button" class="ex-iconbtn ex-iconbtn--comments" aria-expanded="false" aria-controls="maincomments" aria-label="Comments">
+  <svg class="ex-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </svg>
+  <span class="ex-badge ex-comment-badge" aria-hidden="true">2</span>
+  <span class="ex-icon-tooltip" aria-hidden="true">Comments</span>
+</button>
+<!-- Interactive Toys: forward to the existing Lovense control. -->
+    <button type="button" id="exLovenseWand" class="ex-iconbtn ex-iconbtn--wand" aria-label="Interactive Toys" onclick="event.preventDefault(); event.stopPropagation();
+        var wand = this;
+        var link = document.getElementById('interactivetoysRemote');
+        if (!link || wand.disabled) return;
+        var bridge = window.EXLovenseLegacyBridge;
+        if (bridge &amp;&amp; bridge.isMobile()) { link.click(); return; }
+        var sdkButton = document.querySelector('#iToys .lvs-pc-sync-btn');
+        if (sdkButton &amp;&amp; document.querySelector('.lvs-quick-init-box')) { sdkButton.click(); return; }
+        if (!sdkButton) link.click();
+        wand.disabled = true;
+        var attempts = 0;
+        var waitForButton = setInterval(function () {
+          var readyButton = document.querySelector('#iToys .lvs-pc-sync-btn');
+          var popupReady = readyButton &amp;&amp; document.querySelector('.lvs-quick-init-box');
+          if (popupReady || ++attempts &gt;= 50 || !wand.isConnected) {
+            clearInterval(waitForButton);
+            wand.disabled = false;
+            if (popupReady &amp;&amp; wand.isConnected) readyButton.click();
+          }
+        }, 100);">
+      <svg class="ex-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M11 4l1.2 3.3L15.5 8l-3.3 1.2L11 12.5 9.8 9.2 6.5 8l3.3-.7L11 4zM16 13l.8 2.2L19 16l-2.2.8L16 19l-.8-2.2L13 16l2.2-.8L16 13zM4 20L14.5 9.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span class="ex-icon-tooltip" aria-hidden="true">Interactive Toys</span>
+      </button>
+    </div>   
+  </div>
+</div>
+
+    <!-- RIGHT COLUMN (WIDE) -->
+    <div class="ex-grid-item ex-grid-item--wide-span2">
+      <div class="ex-grid" data-items="1" data-items-xl="1" data-items-lg="1" data-items-md="1" data-items-sm="1" data-items-xs="1" data-gap="10" style="--cols: 1; --gap: 10px;">
+
+        <div class="ex-grid-item">
+          
+<div class="ex-player is-paused" data-set-id="6407" data-title="Leah Gotti - Cute Little Things #3" data-poster="" data-preload="metadata" data-autoplay="false" data-muted="false" data-playsinline="true" data-default-quality="1080p" data-thumbs-base="https://nsnetworkthumbs.newsensations.com/members/content/upload/ns-leah_gotti_ramon_nomar_CuteLittleThings03_1920/playerthumbs?validfrom=1791980428&amp;validto=1792153228&amp;hdl=-1&amp;hash=jvMij4tuownxz7cgLBAHKrwqQmE%3D/" data-thumbs-pattern="thumb%4d.jpg" data-thumbs-interval="10" data-sources="[{&quot;label&quot;:&quot;2160p&quot;,&quot;src&quot;:&quot;https://nsnetworkmembers.newsensations.com/members/content/upload/ns-leah_gotti_ramon_nomar_CuteLittleThings03_1920/3840x2160MP4_4K_25K/leah_gotti_ramon_nomar_sc03_cutelittlethings03.mp4?validfrom=1792063228&amp;validto=1792070428&amp;hash=HcLHyUgCyzsS6xd4HJnheKVUbfA%3D&quot;,&quot;type&quot;:&quot;mp4&quot;,&quot;width&quot;:null,&quot;height&quot;:null,&quot;bitrate&quot;:2160},{&quot;label&quot;:&quot;1080p&quot;,&quot;src&quot;:&quot;https://nsnetworkmembers.newsensations.com/members/content/upload/ns-leah_gotti_ramon_nomar_CuteLittleThings03_1920/1920x1080MP4_4K_12K/leah_gotti_ramon_nomar_sc03_cutelittlethings03.mp4?validfrom=1792063228&amp;validto=1792070428&amp;hash=zl48Nn12YcQyZ8bfPr%2FwW3BgaoU%3D&quot;,&quot;type&quot;:&quot;mp4&quot;,&quot;width&quot;:null,&quot;height&quot;:null,&quot;bitrate&quot;:1080},{&quot;label&quot;:&quot;720p&quot;,&quot;src&quot;:&quot;https://nsnetworkmembers.newsensations.com/members/content/upload/ns-leah_gotti_ramon_nomar_CuteLittleThings03_1920/1280x720MP4_4K_06K/leah_gotti_ramon_nomar_sc03_cutelittlethings03.mp4?validfrom=1792063228&amp;validto=1792070428&amp;hash=IO%2BZHCu0xh3CsffVKfti%2F8EcIaE%3D&quot;,&quot;type&quot;:&quot;mp4&quot;,&quot;width&quot;:null,&quot;height&quot;:null,&quot;bitrate&quot;:720},{&quot;label&quot;:&quot;360p&quot;,&quot;src&quot;:&quot;https://nsnetworkmembers.newsensations.com/members/content/upload/ns-leah_gotti_ramon_nomar_CuteLittleThings03_1920/640x360MP4_03000/leah_gotti_ramon_nomar_sc03_cutelittlethings03.mp4?validfrom=1792063228&amp;validto=1792070428&amp;hash=iQaeKQTF5QL23soYDp%2F6h4kMFH8%3D&quot;,&quot;type&quot;:&quot;mp4&quot;,&quot;width&quot;:null,&quot;height&quot;:null,&quot;bitrate&quot;:360}]" tabindex="0" style="--ar: 3840/2160;"><video class="exp-video" preload="metadata" crossorigin="anonymous" playsinline="" webkit-playsinline="" src="https://nsnetworkmembers.newsensations.com/members/content/upload/ns-leah_gotti_ramon_nomar_CuteLittleThings03_1920/3840x2160MP4_4K_25K/leah_gotti_ramon_nomar_sc03_cutelittlethings03.mp4?validfrom=1792063228&amp;validto=1792070428&amp;hash=HcLHyUgCyzsS6xd4HJnheKVUbfA%3D"></video><div class="exp-title">Leah Gotti - Cute Little Things #3</div><button type="button" class="exp-center-play" aria-label="Play"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"></path></svg></button><div class="exp-chrome" role="group" aria-label="Player controls"><div class="exp-progress" aria-label="Seek" style="touch-action: none;"><div class="exp-progress-track"></div><div class="exp-progress-buffered" style="width: 0.183945%;"></div><div class="exp-progress-played" style="width: 0.0721041%;"></div></div><div class="exp-row"><div class="exp-left"><button class="exp-btn exp-play" aria-label="Play/Pause"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"></path></svg></button><div class="exp-time"><span class="exp-cur">0:01</span> / <span class="exp-dur">33:14</span></div><div class="exp-vol"><button class="exp-btn exp-mute" aria-label="Mute"><svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6L7 10H3z" fill="currentColor"></path></svg></button><input class="exp-vol-slider" type="range" min="0" max="1" step="0.05" value="1"></div></div><div class="exp-right"><button class="exp-btn exp-quality" aria-label="Quality"><span style="font-weight:700">HD</span></button><button class="exp-btn exp-speed" aria-label="Playback speed">1x</button><button class="exp-btn exp-theater" aria-label="Theater mode"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM2 8h2v8H2zm18 0h2v8h-2z" fill="currentColor"></path></svg></button><button class="exp-btn exp-pip" aria-label="Picture in Picture"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3zM13 9h7v6h-7z" fill="currentColor"></path></svg></button></div></div><div class="exp-thumb-preview" aria-hidden="true" style="left: 238.269px; background-image: url(&quot;https://nsnetworkthumbs.newsensations.com/members/content/upload/ns-leah_gotti_ramon_nomar_CuteLittleThings03_1920/playerthumbs/thumb0084.jpg?validfrom=1791980428&amp;validto=1792153228&amp;hdl=-1&amp;hash=jvMij4tuownxz7cgLBAHKrwqQmE%3D&quot;);"><div class="exp-thumb-time">13:56</div></div><button class="exp-btn exp-fs" aria-label="Fullscreen"><svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm12 3h-3v2h5v-5h-2v3zM7 7h3V5H5v5h2V7zm12 3h2V5h-5v5h2V7z" fill="currentColor"></path></svg></button></div><div class="exp-3d-mobile-controls" aria-label="3D player controls"><button type="button" class="exp-3d-mobile-btn exp-3d-mobile-play" aria-label="Play/Pause"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"></path></svg></button><button type="button" class="exp-3d-mobile-btn exp-3d-mobile-fs" aria-label="Fullscreen"><svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm12 3h-3v2h5v-5h-2v3zM7 7h3V5H5v5h2V7zm12 3h2V5h-5v5h2V7z" fill="currentColor"></path></svg></button></div></div>
+        </div>
+
+        <div class="ex-grid-item">
+          <div class="ex-grid-collapse" data-collapsed="1" data-label="Details">
+            <button type="button" class="ex-grid-collapse-head" aria-expanded="false">
+              <span class="ex-grid-collapse-label">Details</span>
+              <span class="ex-grid-collapse-chev" aria-hidden="true"></span>
+            </button>
+
+            <div class="ex-grid-collapse-body" style="max-height: 0px;">
+              <div class="ex-grid-collapse-inner">
+                <div class="ex-grid-item">
+                  Frisky Redhead Leah was ready to give up her teen pussy to me today. She pulled off her pants showing her great ass and soaked pink pussy, that I just had to taste. She gobbled up my thick cock while I got her young hole to squirt her sweet juices. I totally fucked her hot young pussy deep and hard while she gushed again, so did I, all over her puss.                  </div>
+                
+                
+                      <div class="ex-grid-item"><span>04/02/2016,</span> 
+77&nbsp;Photos, 33&nbsp;Minutes of Video</div>
+    
+        <div class="ex-grid-item"><span>CATEGORIES:</span><p> 
+<a href="category.php?id=59&amp;s=d&amp;cat=Deep Throat">Deep Throat</a><font style="color:#2d2d2d">,</font> <a href="category.php?id=25&amp;s=d&amp;cat=Natural Tits">Natural Tits</a><font style="color:#2d2d2d">,</font> <a href="category.php?id=8&amp;s=d&amp;cat=Redheads">Redheads</a><font style="color:#2d2d2d">,</font> <a href="category.php?id=35&amp;s=d&amp;cat=Squirting">Squirting</a><font style="color:#2d2d2d">,</font> <a href="category.php?id=479&amp;s=d&amp;cat=Stockings / Knee Highs">Stockings / Knee Highs</a><font style="color:#2d2d2d">,</font> <a href="category.php?id=36&amp;s=d&amp;cat=Teen (18+)">Teen (18+)</a></p></div>
+  
+   <div class="ex-grid-item">
+                       <div class="textLink" style="padding:0px !important;"><span>DVD:</span><p> <!--
+
+PLEASE BACK UP FILE BEFORE EDITING!!!
+
+TEXT EDITING NOTE:
+All text can be edited inside the admin panel to preserve  multi-language site functionality. All tags prefixed with "$templatefields" can be edited inside the CMS admin panel.
+
+-->
+
+<a href="dvds.php?id=1325">Cute Little Things #3</a>
+</p></div>
+                </div>
+                
+                
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  
+<script src="https://cdn.lovense-api.com/peditor-v2/pattern-sdk.js"></script>
+<script src="https://cdn.lovense-api.com/UploadFiles/surfease/site/vibemate-sdk.js"></script>
+
+<style>
+#toys-overlay {
+position: fixed;
+background: rgba(255,255,255,0.5);
+background-repeat: repeat;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 10000;
+display: none;
+}
+
+#toys-overlay .popup {
+position: absolute;
+top: 0;
+bottom: 0;
+left: 0;
+right: 0;
+margin: auto;
+width: 775px;
+height: 255px;
+background-color: white;
+border-style: dotted;
+text-align: center;
+padding: 10px;
+}
+
+#showCode {
+width: 140px;
+margin: auto;
+float: right;
+}
+
+.lovense-icon-div {
+float: left;
+margin-left: 10px;
+margin-top: 5px;
+}
+
+.lovense-icon {
+border-radius: 10px;
+box-shadow: 5px 5px 5px gray;
+}
+</style>
+
+<div id="favediv" style="margin-left:1.5%">
+<a id="interactivetoysRemote" href="#" class="favurl favnodelink" target="_self">
+  <div class="table">
+    <div class="row" style="text-align:center;">
+      <div id="iToys" class="favtxt cell_content">Interactive Toys</div>
+    </div>
+  </div>
+</a>
+</div>
+
+<div id="toys-overlay" onclick="if (window.EXLovenseLegacyBridge) window.EXLovenseLegacyBridge.closePopup();">
+<div class="popup" onclick="event.stopPropagation();">
+  <h4 style="padding-top:20px;">Please open "Lovense Remote" app on your smart phone and scan the QR code below:</h4>
+  <div style="margin:20px;">
+    <div class="lovense-icon-div">
+      <img class="lovense-icon" width="55%" style="border-radius:10px;" src="https://play-lh.googleusercontent.com/-Y1OfHFwxZbn1M6EbRu_RQuTQ2AZzKs-HIDh4zP9WqLd8vQIsWtyT2rnG_2oLKLpYA=w240-h480-rw" alt="Lovense Remote App">
+    </div>
+    <div id="showCode"><div id="initStatus"></div></div>
+  </div>
+  <div style="clear:all;"></div>
+  <div style="margin-right:245px;">
+    <h4>You may alternatively use the code below to connect your phone:</h4>
+    <div id="lovenseCode"></div>
+  </div>
+</div>
+</div>
+
+
+<script>
+(function($){
+'use strict';
+
+if (window.EXLovenseLegacyBridge) return;
+
+var EXLovenseLegacyBridge = {
+  ctoken: "HIsOLpzbPQSiS9g1KRpleBtLHbSVnDiEEU_O824HBI7ZPaJUeGLlrNWFUnvAVMzJX5eD3uJGfnpk9_lTIFRL2RccJ21V6K6sSosqi8Cxp1UkfmssT_FYwHJcTtQkzPqCpMd-LrJr5bq59a1L4VhxQAJjVr_ahc9T-YTNPqPYXZ0",
+  mediaId: "6407",
+  durationMs: 1994000,
+
+  lovensePattern: null,
+  remoteEventsBound: false,
+  pcSyncTimer: null,
+  pendingAction: null,
+
+  isMobile: function(){
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  },
+
+  getVideo: function(){
+    return document.querySelector('#mainplayer .ex-player .exp-video, #mainplayer .ex-player video');
+  },
+
+  getButtonLabel: function(){
+    return document.getElementById('iToys');
+  },
+
+  getButtonLink: function(){
+    return document.getElementById('interactivetoysRemote');
+  },
+
+  getMainPlayer: function(){
+    return document.getElementById('mainplayer');
+  },
+
+  isMainPlayerVisible: function(){
+    var main = this.getMainPlayer();
+    if (!main) return false;
+    return !main.hasAttribute('hidden') && main.offsetParent !== null;
+  },
+
+  ensureFullSceneFirst: function(action){
+    var video = this.getVideo();
+
+    if (this.isMainPlayerVisible() && video) {
+      return false;
+    }
+
+    var trigger = document.querySelector('[data-ex-watch-fullscene]');
+    if (!trigger) return false;
+
+    this.pendingAction = action || null;
+    trigger.click();
+
+    return true;
+  },
+
+  ensurePattern: function(){
+    if (!this.lovensePattern && window.LovensePattern) {
+      this.lovensePattern = new LovensePattern();
+    }
+    return this.lovensePattern;
+  },
+
+  closePopup: function(){
+    var overlay = document.getElementById('toys-overlay');
+    if (overlay) overlay.style.display = 'none';
+  },
+
+  markUnsynced: function(){
+    var btn = this.getButtonLabel();
+    if (btn) btn.innerHTML = 'Interactive Toys';
+
+    var link = this.getButtonLink();
+    if (link) {
+      link.href = '#';
+      link.target = '_self';
+    }
+  },
+
+  disconnectRemote: function(){
+    var lp = this.ensurePattern();
+
+    try {
+      if (lp) lp.exit();
+    } catch(e) {
+      console.warn('EXLovenseLegacyBridge exit failed', e);
+    }
+
+    this.markUnsynced();
+
+    var video = this.getVideo();
+    if (video) {
+      video._lovensePcSynced = false;
+      video._lovensePlaybackBound = false;
+    }
+  },
+
+  /*
+   * Desktop / PC / Vibemate path.
+   * Mirrors the old working bottom block:
+   * LovensePattern.sync({
+   *   duration: 0,
+   *   supportedVibemate: true
+   * })
+   * with the EX player video replacing #mediabox.
+   */
+  syncPcVibemate: function(){
+    var lp = this.ensurePattern();
+    var video = this.getVideo();
+    var btn = this.getButtonLabel();
+
+    console.log('EXLovenseLegacyBridge syncPcVibemate', {
+      hasPatternClass: !!window.LovensePattern,
+      hasPatternInstance: !!lp,
+      hasVideo: !!video,
+      hasIToys: !!btn,
+      videoSrc: video ? video.currentSrc : null
+    });
+
+    if (!lp || !video || !btn) return false;
+
+    if (video.currentSrc && /\/trailers\//i.test(video.currentSrc)) {
+      console.log('EXLovenseLegacyBridge refusing trailer source');
+      return false;
+    }
+
+    if (video._lovensePcSynced) {
+      console.log('EXLovenseLegacyBridge pc already synced to this video');
+      return false;
+    }
+
+    try {
+      lp.sync({
+        ctoken: this.ctoken,
+        mediaId: this.mediaId,
+        duration: 0,
+        videoEl: video,
+        btnId: 'iToys',
+        syncButtonText: 'Interactive Toys',
+        syncedButtonText: 'UNSYNC TOY',
+        supportedVibemate: true
+      });
+
+      video._lovensePcSynced = true;
+
+      console.log('EXLovenseLegacyBridge pc/vibemate lp.sync() called', video);
+
+      return false;
+    } catch(e) {
+      console.warn('EXLovenseLegacyBridge pc/vibemate sync failed', e);
+      return false;
+    }
+  },
+
+  schedulePcSync: function(delay){
+    var self = this;
+
+    clearTimeout(this.pcSyncTimer);
+    this.pcSyncTimer = setTimeout(function(){
+      self.syncPcVibemate();
+    }, delay || 120);
+  },
+
+  // Mobile handoff uses the SDK-generated VibeMate link for this page.
+  startMobileVibemate: function(){
+    var self = this;
+    var vm = window.vibemate;
+    if (this.vibemateOpening) return false;
+    if (!vm || typeof vm.init !== 'function' || typeof vm.getApp !== 'function') {
+      window.alert('VibeMate is still loading. Please try again.');
+      return false;
+    }
+    this.vibemateOpening = true;
+    var finished = false;
+    var finish = function(message){
+      if (finished) return false;
+      finished = true;
+      clearTimeout(timer);
+      self.vibemateOpening = false;
+      if (message) window.alert(message);
+      return true;
+    };
+    var timer = setTimeout(function(){
+      finish('Unable to open VibeMate. Please try again.');
+    }, 15000);
+    try {
+      vm.init({ctoken: this.ctoken});
+      vm.getApp(function(data){
+        if (finished) return;
+        if (data && data.result === true) {
+          finish();
+          // Already inside VibeMate; its native controls handle syncing.
+          return;
+        }
+        if (!data || typeof data.url !== 'string' || !/^https:\/\//i.test(data.url)) {
+          finish('Unable to get the VibeMate link. Please try again.');
+          return;
+        }
+        finish();
+        // Same-tab navigation avoids opening an asynchronous popup window.
+        window.location.assign(data.url);
+      });
+    } catch (error) {
+      finish('Unable to open VibeMate. Please try again.');
+    }
+    return false;
+  },
+
+  /*
+   * Lovense Remote QR/app path.
+   * Mirrors the old working init() + lovenseSyncPattern() path,
+   * with the EX player video replacing #mediabox.
+   */
+  startLovenseRemote: function(){
+    var self = this;
+    var lp;
+
+    if (this.ensureFullSceneFirst('remote')) {
+      console.log('EXLovenseLegacyBridge waiting for full scene before remote');
+      return false;
+    }
+
+    lp = this.ensurePattern();
+
+    if (!lp) {
+      console.warn('EXLovenseLegacyBridge remote aborted: LovensePattern unavailable');
+      return false;
+    }
+
+    try {
+      lp.init({
+        ctoken: this.ctoken,
+        mediaId: this.mediaId,
+        duration: this.durationMs
+      });
+
+      var status = document.getElementById('initStatus');
+      if (status) {
+        setTimeout(function(){
+          status.innerText = 'Success';
+        }, 1000);
+      }
+    } catch(error) {
+      var errStatus = document.getElementById('initStatus');
+      if (errStatus) errStatus.innerText = 'Error! Cannot Connect.';
+      console.warn('EXLovenseLegacyBridge remote init failed', error);
+    }
+
+    this.bindRemoteEvents();
+
+    try {
+      lp.getApp(function(data){
+        console.log('EXLovenseLegacyBridge remote getApp', data);
+
+        if (data && data.qrCode) {
+          var showCode = document.getElementById('showCode');
+          if (showCode) {
+            showCode.innerHTML = '<img src="' + data.qrCode + '" alt="Scan it with Lovense Remote mobile app">';
+          }
+        }
+
+        if (data && data.code) {
+          var lovenseCode = document.getElementById('lovenseCode');
+          if (lovenseCode) {
+            lovenseCode.innerHTML = '<h2 style="padding:0;">Code: "' + data.code + '"</h2>';
+          }
+        }
+
+        var overlay = document.getElementById('toys-overlay');
+        if (overlay) overlay.style.display = 'block';
+
+        if (self.isMobile() && data && data.appOpenUrl) {
+          window.open(data.appOpenUrl, '_blank');
+        }
+      });
+    } catch(e) {
+      console.warn('EXLovenseLegacyBridge remote getApp failed', e);
+    }
+
+    return false;
+  },
+
+  bindPlaybackBridge: function(video){
+    var lp = this.ensurePattern();
+
+    if (!lp || !video || video._lovensePlaybackBound) return;
+
+    var patternPlay = false;
+
+    function onPlay(){
+      patternPlay = true;
+
+      try {
+        lp.play({
+          speed: video.playbackRate || 1,
+          currentTime: Math.round((video.currentTime || 0) * 1000)
+        });
+      } catch(e) {
+        console.warn('EXLovenseLegacyBridge play bridge failed', e);
+      }
+    }
+
+    function onPause(){
+      patternPlay = false;
+
+      try {
+        lp.pause();
+      } catch(e) {}
+    }
+
+    function onTimeUpdate(){
+      if (!patternPlay && !video.paused) {
+        onPlay();
+      }
+    }
+
+    function onSeeked(){
+      onPause();
+
+      if (!video.paused) {
+        setTimeout(onPlay, 20);
+      }
+    }
+
+    video.addEventListener('pause', onPause);
+    video.addEventListener('play', onPlay);
+    video.addEventListener('seeked', onSeeked);
+    video.addEventListener('waiting', onPause);
+    video.addEventListener('timeupdate', onTimeUpdate);
+    video.addEventListener('ratechange', onPlay);
+    video.addEventListener('canplaythrough', onPlay);
+
+    video._lovensePlaybackBound = true;
+
+    console.log('EXLovenseLegacyBridge playback bridge attached');
+  },
+
+  bindRemoteEvents: function(){
+    var self = this;
+    var lp = this.ensurePattern();
+
+    if (!lp || this.remoteEventsBound) return;
+
+    this.remoteEventsBound = true;
+
+    lp.on('remoteConnected', function(){
+      console.log('EXLovenseLegacyBridge remoteConnected');
+
+      try {
+        lp.getPatternList({
+          mediaId: self.mediaId,
+          page: 1,
+          pageSize: 10
+        }).then(function(res){
+          console.log('EXLovenseLegacyBridge patternList', res && res.list);
+
+          var data = res && res.list ? res.list[0] : null;
+
+          if (data && data.patternUrl) {
+            lp.loadPattern({
+              type: 'lovense',
+              patternLink: data.patternUrl
+            });
+
+            var video = self.getVideo();
+            if (video) {
+              self.bindPlaybackBridge(video);
+            }
+          }
+        });
+      } catch(e) {
+        console.warn('EXLovenseLegacyBridge getPatternList failed', e);
+      }
+
+      self.closePopup();
+
+      var btn = self.getButtonLabel();
+      if (btn) btn.innerHTML = 'Disconnect Remote';
+
+      var link = self.getButtonLink();
+      if (link) {
+        link.href = '#';
+        link.target = '_self';
+        link.onclick = function(e){
+          e.preventDefault();
+          self.disconnectRemote();
+          return false;
+        };
+      }
+    });
+
+    lp.on('patternLoaded', function(){
+      console.log('EXLovenseLegacyBridge patternLoaded');
+
+      var video = self.getVideo();
+      if (!video) return;
+
+      self.bindPlaybackBridge(video);
+
+      try {
+        video.play().catch(function(){});
+      } catch(e) {}
+
+      try {
+        lp.play({
+          speed: video.playbackRate || 1,
+          currentTime: Math.round((video.currentTime || 0) * 1000)
+        });
+      } catch(e) {
+        console.warn('EXLovenseLegacyBridge patternLoaded play failed', e);
+      }
+    });
+
+    lp.on('PatternSyncError', function(data){
+      console.log('EXLovenseLegacyBridge PatternSyncError', data);
+    });
+
+    lp.on('remoteToyStatus', function(data){
+      console.log('EXLovenseLegacyBridge remoteToyStatus', data);
+    });
+
+    lp.on('remoteDisconnected', function(){
+      console.log('EXLovenseLegacyBridge remoteDisconnected');
+
+      var video = self.getVideo();
+
+      if (video) {
+        try { video.pause(); } catch(e) {}
+      }
+
+      self.disconnectRemote();
+    });
+
+    lp.on('remoteExitPattern', function(){
+      console.log('EXLovenseLegacyBridge remoteExitPattern');
+
+      var video = self.getVideo();
+
+      if (video) {
+        try { video.pause(); } catch(e) {}
+      }
+    });
+  },
+
+  bindUI: function(){
+    var self = this;
+    var link = this.getButtonLink();
+
+    if (link) {
+      link.onclick = function(e){
+        e.preventDefault();
+
+        if (self.isMobile()) {
+          return self.startMobileVibemate();
+        }
+
+        if (self.ensureFullSceneFirst('pc')) {
+          return false;
+        }
+
+        self.syncPcVibemate();
+        return false;
+      };
+    }
+
+    document.addEventListener('ex:fullscene-ready', function(e){
+      console.log('EXLovenseLegacyBridge ex:fullscene-ready', e.detail || {});
+
+      if (self.pendingAction === 'remote') {
+        self.pendingAction = null;
+        self.startLovenseRemote();
+        return;
+      }
+
+      if (self.pendingAction === 'pc') {
+        self.pendingAction = null;
+        self.schedulePcSync(120);
+        return;
+      }
+
+      self.schedulePcSync(180);
+    });
+
+    $(document).on('click.exlovenseLegacy', '[data-ex-watch-fullscene]', function(){
+      self.schedulePcSync(180);
+    });
+
+    $(document).on('click.exlovenseLegacy', '[data-ex-toggle-trailer]', function(){
+      var video = self.getVideo();
+      if (video) video._lovensePcSynced = false;
+    });
+
+    $(document).on('click.exlovenseLegacy', '#mainplayer .exp-menu-item, #mainplayer .quality-selector-btn, #mainplayer [data-quality], #mainplayer [data-ex-quality]', function(){
+      var video = self.getVideo();
+      if (video) video._lovensePcSynced = false;
+      self.schedulePcSync(180);
+    });
+  },
+
+  bindEditPattern: function(){
+    var self = this;
+    var edit = document.getElementById('editPatternRemote');
+
+    if (!edit) return;
+
+    edit.onclick = function(e){
+      e.preventDefault();
+
+      if (self.isMobile()) return false;
+
+      if (self.ensureFullSceneFirst('edit')) {
+        return false;
+      }
+
+      var video = self.getVideo();
+
+      if (!video || !window.LovensePattern) {
+        console.warn('EXLovenseLegacyBridge edit pattern aborted: no active video');
+        return false;
+      }
+
+      var lp = new LovensePattern();
+
+      setTimeout(function(){
+        try {
+          lp.editInit({
+            ctoken: self.ctoken,
+            mediaId: self.mediaId,
+            duration: self.durationMs,
+            domId: 'patterneditor',
+            videoEl: video,
+            editorWidth: 1064
+          });
+
+          lp.on('exitPatternEditor', function(){
+            $('#editPatternRemote').show();
+          });
+
+          $('#editPatternRemote').hide();
+        } catch(err) {
+          console.warn('EXLovenseLegacyBridge edit pattern init failed', err);
+        }
+      }, 400);
+
+      return false;
+    };
+
+    document.addEventListener('ex:fullscene-ready', function(){
+      if (self.pendingAction === 'edit') {
+        self.pendingAction = null;
+        edit.click();
+      }
+    });
+  },
+
+  init: function(){
+    var self = this;
+
+    function start(){
+      self.ensurePattern();
+      self.bindRemoteEvents();
+      self.bindUI();
+      self.bindEditPattern();
+      self.markUnsynced();
+
+      console.log('EXLovenseLegacyBridge initialized');
+    }
+
+    if (window.LovensePattern) {
+      start();
+    } else {
+      $.getScript('https://cdn.lovense-api.com/peditor-v2/lib/index.js', start);
+    }
+  }
+};
+
+window.EXLovenseLegacyBridge = EXLovenseLegacyBridge;
+
+$(function(){
+
+EXLovenseLegacyBridge.init();
+});
+
+})(jQuery);
+</script>
+</section>
