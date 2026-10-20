@@ -31,6 +31,8 @@ class ChaptersFileReader(VideoMarksFileReader):
             except ValueError as exc:
                 raise ValueError(f"Invalid chapter timecode at line {line_number}") from exc
 
+            if not label:
+                raise ValueError(f"Invalid chapter at line {line_number}: label must not be empty")
             chapters.addMark(Chapter(timecode, label))
 
         return chapters

@@ -29,6 +29,9 @@ class BookmarksFileReader(VideoMarksFileReader):
             except ValueError as exc:
                 raise ValueError(f"Invalid bookmark timecode at line {line_number}") from exc
 
-            bookmarks.addMark(Bookmark(timecode, label.strip()))
+            label = label.strip()
+            if not label:
+                raise ValueError(f"Invalid bookmark at line {line_number}: label must not be empty")
+            bookmarks.addMark(Bookmark(timecode, label))
 
         return bookmarks

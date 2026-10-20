@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import timedelta
 
 
@@ -14,7 +15,11 @@ class TimeCode:
             self._milliseconds = 0
             return
 
-        hours, remainder = divmod(int(time_delta.total_seconds()), 3600)
+        if time_delta < timedelta(0):
+            raise ValueError("Timecode cannot be negative")
+
+        total_seconds = time_delta.days * 86400 + time_delta.seconds
+        hours, remainder = divmod(total_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         self._hours = hours
         self._minutes = minutes
@@ -43,23 +48,9 @@ class TimeCode:
     @classmethod
     def from_string(cls, value: str) -> TimeCode:
         """Create a timecode from an HH:MM:SS.mmm string."""
-        try:
-            hours_text, minutes_text, seconds_text = value.split(":")
-            seconds_part, milliseconds_text = seconds_text.split(".")
-            hours = int(hours_text)
-            minutes = int(minutes_text)
-            seconds = int(seconds_part)
-            milliseconds = int(milliseconds_text)
-        except ValueError as exc:
-            raise ValueError(f"Invalid timecode: {value!r}") from exc
-
-        if (
-            hours < 0
-            or not 0 <= minutes < 60
-            or not 0 <= seconds < 60
-            or not 0 <= milliseconds < 1000
-            or len(milliseconds_text) != 3
-        ):
+        match = re.fullmatch(r"([0-9]{2,}):([0-5][0-9]):([0-5][0-9])\.([0-9]{3})", value)
+        if match is None:
             raise ValueError(f"Invalid timecode: {value!r}")
 
+        hours, minutes, seconds, milliseconds = (int(field) for field in match.groups())
         return cls(timedelta(hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds))

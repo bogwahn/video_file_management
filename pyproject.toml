@@ -37,7 +37,7 @@ Homepage = "https://github.com/bogwahn/video_file_management"
 Issues = "https://github.com/bogwahn/video_file_management/issues"
 
 [project.scripts]
-chapterize = "video_file_management.commands.chapterize.cli:main"
+chapterize = "video_file_management.chapterize.cli:main"
 remux = "video_file_management.commands.remux.cli:main"
 
 [tool.pytest.ini_options]
@@ -110,4 +110,3 @@ exclude_dirs = [
 [tool.coverage.run]
 branch = true
 source = ["src/video_file_management"]
-
